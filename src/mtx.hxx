@@ -5,7 +5,6 @@
 #include <fstream>
 #include <algorithm>
 #include "_main.hxx"
-#include "DiGraph.hxx"
 
 using std::string;
 using std::istream;
@@ -53,22 +52,12 @@ void readMtx(G& a, istream& s) {
   }
 }
 
-auto readMtx(istream& s) {
-  DiGraph<> a; readMtx(a, s);
-  return a;
-}
-
 
 template <class G>
 void readMtx(G& a, const char *pth) {
   string buf = readFile(pth);
   stringstream s(buf);
   return readMtx(a, s);
-}
-
-auto readMtx(const char *pth) {
-  DiGraph<> a; readMtx(a, pth);
-  return a;
 }
 
 

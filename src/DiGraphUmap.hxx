@@ -1,37 +1,38 @@
 #pragma once
 #include <vector>
+#include <unordered_map>
 #include <ostream>
 #include <iostream>
 #include "_main.hxx"
 
 using std::vector;
+using std::unordered_map;
 using std::ostream;
 using std::cout;
 
 
 
 
-// DI-GRAPH
-// --------
+// DI-GRAPH (UNORDERED MAP)
+// ------------------------
 
 template <class V=NONE, class E=NONE>
-class DiGraph {
+class DiGraphUmap {
   public:
   using TVertex = V;
   using TEdge   = E;
 
   private:
-  vector<int>  none;
   vector<bool> vex;
-  vector<vector<int>> vto;
-  vector<vector<E>> edata;
-  vector<V>         vdata;
+  vector<V>    vdata;
+  vector<unordered_map<int, E>> edata;
+  unordered_map<int, E>         none;
   int N = 0, M = 0;
 
   // Cute helpers
   private:
-  int s() const { return vto.size(); }
-  int ei(int u, int v) const { return findIndex(vto[u], v); }
+  int  s() const { return vex.size(); }
+  bool eex(int u, int v) const { return edata[u].count(v); }
 
   // Read operations
   public:
@@ -40,18 +41,18 @@ class DiGraph {
   int size()  const { return M; }
 
   bool hasVertex(int u)      const { return u < s() && vex[u]; }
-  bool hasEdge(int u, int v) const { return u < s() && ei(u, v) >= 0; }
-  auto edges(int u)          const { return u < s()? iterable(vto[u]) : iterable(none); }
-  int degree(int u)          const { return u < s()? vto[u].size()    : 0; }
+  bool hasEdge(int u, int v) const { return u < s() && eex(u, v); }
+  auto edges(int u)          const { return u < s()? keys(edata[u])  : keys(none); }
+  int degree(int u)          const { return u < s()? edata[u].size() : 0; }
   auto vertices()      const { return filter(range(s()), [&](int u) { return  vex[u]; }); }
   auto nonVertices()   const { return filter(range(s()), [&](int u) { return !vex[u]; }); }
-  auto inEdges(int v)  const { return filter(range(s()), [&](int u) { return ei(u, v) >= 0; }); }
-  int inDegree(int v) const { return countIf(range(s()), [&](int u) { return ei(u, v) >= 0; }); }
+  auto inEdges(int v)  const { return filter(range(s()), [&](int u) { return eex(u, v); }); }
+  int inDegree(int v) const { return countIf(range(s()), [&](int u) { return eex(u, v); }); }
 
   V vertexData(int u)   const { return hasVertex(u)? vdata[u] : V(); }
   void setVertexData(int u, V d) { if (hasVertex(u)) vdata[u] = d; }
-  E edgeData(int u, int v)   const { return hasEdge(u, v)? edata[u][ei(u, v)] : E(); }
-  void setEdgeData(int u, int v, E d) { if (hasEdge(u, v)) edata[u][ei(u, v)] = d; }
+  E edgeData(int u, int v)   const { return hasEdge(u, v)? edata[u][v] : E(); }
+  void setEdgeData(int u, int v, E d) { if (hasEdge(u, v)) edata[u][v] = d; }
 
   // Write operations
   public:
@@ -59,9 +60,8 @@ class DiGraph {
     if (hasVertex(u)) return;
     if (u >= s()) {
       vex.resize(u+1);
-      vto.resize(u+1);
-      edata.resize(u+1);
       vdata.resize(u+1);
+      edata.resize(u+1);
     }
     vex[u] = true;
     vdata[u] = d;
@@ -72,23 +72,19 @@ class DiGraph {
     if (hasEdge(u, v)) return;
     addVertex(u);
     addVertex(v);
-    vto[u].push_back(v);
-    edata[u].push_back(d);
+    edata[u][v] = d;
     M++;
   }
 
   void removeEdge(int u, int v) {
     if (!hasEdge(u, v)) return;
-    int o = ei(u, v);
-    eraseIndex(vto[u], o);
-    eraseIndex(edata[u], o);
+    edata[u].erase(v);
     M--;
   }
 
   void removeEdges(int u) {
     if (!hasVertex(u)) return;
     M -= degree(u);
-    vto[u].clear();
     edata[u].clear();
   }
 
@@ -115,7 +111,7 @@ class DiGraph {
 
 
 template <class V, class E>
-void write(ostream& a, const DiGraph<V, E>& x, bool all=false) {
+void write(ostream& a, const DiGraphUmap<V, E>& x, bool all=false) {
   a << "order: " << x.order() << " size: " << x.size();
   if (!all) { a << " {}"; return; }
   a << " {\n";
@@ -129,7 +125,7 @@ void write(ostream& a, const DiGraph<V, E>& x, bool all=false) {
 }
 
 template <class V, class E>
-void print(const DiGraph<V, E>& x, bool all=false) { write(cout, x, all); }
+void print(const DiGraphUmap<V, E>& x, bool all=false) { write(cout, x, all); }
 
 template <class V, class E>
-void println(const DiGraph<V, E>& x, bool all=false) { print(x, all); cout << "\n"; }
+void println(const DiGraphUmap<V, E>& x, bool all=false) { print(x, all); cout << "\n"; }

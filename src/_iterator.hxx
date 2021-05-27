@@ -351,3 +351,20 @@ auto range(T v, T V, T DV=1) {
   auto x = range(rangeSize(v, V, DV));
   return transform(x, [=](int n) { return v+DV*n; });
 }
+
+
+
+
+// KEYS, VALUES
+// ------------
+
+template <class K, class V>
+auto keys(const unordered_map<K, V>& x) {
+  return transform(x, [](const auto& p) { return p.first; });
+}
+
+
+template <class K, class V>
+auto values(const unordered_map<K, V>& x) {
+  return transform(x, [](const auto& p) { return p.second; });
+}
