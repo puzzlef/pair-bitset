@@ -7,3 +7,4 @@
 #include "csr.hxx"
 #include "mtx.hxx"
 #include "transpose.hxx"
+#include "update.hxx"

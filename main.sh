@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-src="pagerank-class-vs-csr"
+src="digraph-edges-vector-vs-unordered_map"
 out="/home/resources/Documents/subhajit/$src.log"
 ulimit -s unlimited
 printf "" > "$out"

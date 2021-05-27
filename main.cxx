@@ -1,3 +1,4 @@
+#include <random>
 #include <cstdio>
 #include <iostream>
 #include "src/main.hxx"
@@ -7,32 +8,44 @@ using namespace std;
 
 
 
-template <class G, class H>
-void runPagerank(const G& x, const H& xt, bool show) {
-  int repeat = 5;
-  vector<float> *init = nullptr;
+void runComparision(const char *file) {
+  random_device dev;
+  default_random_engine rnd(dev());
+  DiGraphVector<> x;
+  DiGraphUmap<> y;
+  DiGraphVector<int> xt;
+  DiGraphUmap<int> yt;
 
-  // Find pagerank using C++ DiGraph class directly.
-  auto a1 = pagerankClass(xt, init, {repeat});
-  auto e1 = absError(a1.ranks, a1.ranks);
-  printf("[%09.3f ms; %03d iters.] [%.4e err.] pagerankClass\n", a1.time, a1.iterations, e1);
-  if (show) println(a1.ranks);
+  // Read mtx using DiGraph with "vector" edges
+  float t1 = measureDuration([&] { readMtx(x, file); });
+  print(x); printf(" [%09.3f ms] readMtx(DiGraphVector)\n", t1);
 
-  // Find pagerank using CSR representation of DiGraph.
-  auto a2 = pagerankCsr(xt, init, {repeat});
-  auto e2 = absError(a2.ranks, a1.ranks);
-  printf("[%09.3f ms; %03d iters.] [%.4e err.] pagerankCsr\n", a2.time, a2.iterations, e2);
-  if (show) println(a2.ranks);
+  // Read mtx using DiGraph with "unordered_map" edges
+  float t2 = measureDuration([&] { readMtx(y, file); });
+  print(y); printf(" [%09.3f ms] readMtx(DiGraphUmap)\n", t2);
+
+  // Update DiGraph with "vector" edges
+  int span = int(1.5 * x.span()), updates = int(0.5 * x.size());
+  float t5 = measureDuration([&] {
+    for (int i=0; i<updates; i++)
+      addRandomEdge(x, rnd, span);
+  });
+  print(x); printf(" [%09.3f ms] addRandomEdge(DiGraphVector)\n", t5);
+
+  // Update DiGraph with "unordered_map" edges
+  float t6 = measureDuration([&] {
+    for (int i=0; i<updates; i++)
+      addRandomEdge(y, rnd, span);
+  });
+  print(y); printf(" [%09.3f ms] addRandomEdge(DiGraphUmap)\n", t6);
 }
 
 
 int main(int argc, char **argv) {
   char *file = argv[1];
   bool  show = argc > 2;
-  printf("Loading graph %s ...\n", file);
-  auto x  = readMtx(file); println(x);
-  auto xt = transposeWithDegree(x); print(xt); printf(" (transposeWithDegree)\n");
-  runPagerank(x, xt, show);
+  printf("Using graph %s ...\n", file);
+  runComparision(file);
   printf("\n");
   return 0;
 }
