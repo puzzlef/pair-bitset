@@ -1,5 +1,7 @@
 #pragma once
 #include "_main.hxx"
+#include "BitSetSorted.hxx"
+#include "BitSetUnsorted.hxx"
 #include "DiGraphSorted.hxx"
 #include "DiGraphUnsorted.hxx"
 #include "vertices.hxx"
@@ -7,6 +9,3 @@
 #include "csr.hxx"
 #include "snap.hxx"
 #include "transpose.hxx"
-#include "ranks.hxx"
-#include "pagerank.hxx"
-#include "pagerankMonolithic.hxx"

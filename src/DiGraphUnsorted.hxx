@@ -3,6 +3,7 @@
 #include <ostream>
 #include <iostream>
 #include "_main.hxx"
+#include "BitSetUnsorted.hxx"
 
 using std::vector;
 using std::ostream;
@@ -16,52 +17,48 @@ using std::cout;
 
 template <class V=NONE, class E=NONE>
 class DiGraphUnsorted {
+  template <class T>
+  using BitSet = BitSetUnsorted<T>;
+
   public:
   using TVertex = V;
   using TEdge   = E;
 
   private:
-  vector<int>  none;
+  BitSet<E>    none;
   vector<bool> vex;
-  vector2d<int> vto;
-  vector2d<E> edata;
-  vector<V>         vdata;
+  vector<V>    vdata;
+  vector<BitSet<E>> edata;
   int N = 0, M = 0;
-
-  // Cute helpers
-  private:
-  int s() const { return vto.size(); }
-  int ei(int u, int v) const { return findIndex(vto[u], v); }
 
   // Read operations
   public:
-  int span()  const { return s(); }
+  int span()  const { return vex.size(); }
   int order() const { return N; }
   int size()  const { return M; }
 
-  bool hasVertex(int u)      const { return u < s() && vex[u]; }
-  bool hasEdge(int u, int v) const { return u < s() && ei(u, v) >= 0; }
-  auto edges(int u)          const { return u < s()? iterable(vto[u]) : iterable(none); }
-  int degree(int u)          const { return u < s()? vto[u].size()    : 0; }
-  auto vertices()      const { return filter(range(s()), [&](int u) { return  vex[u]; }); }
-  auto nonVertices()   const { return filter(range(s()), [&](int u) { return !vex[u]; }); }
-  auto inEdges(int v)  const { return filter(range(s()), [&](int u) { return ei(u, v) >= 0; }); }
-  int inDegree(int v) const { return countIf(range(s()), [&](int u) { return ei(u, v) >= 0; }); }
+  bool hasVertex(int u)      const { return u < span() && vex[u]; }
+  bool hasEdge(int u, int v) const { return u < span() && edata[u].has(v); }
+  auto edges(int u)          const { return u < span()? edata[u].keys() : none.keys(); }
+  int degree(int u)          const { return u < span()? edata[u].size() : 0; }
+  auto vertices()      const { return filter(range(span()), [&](int u) { return  vex[u]; }); }
+  auto nonVertices()   const { return filter(range(span()), [&](int u) { return !vex[u]; }); }
+  auto inEdges(int v)  const { return filter(range(span()), [&](int u) { return edata[u].has(v); }); }
+  int inDegree(int v) const { return countIf(range(span()), [&](int u) { return edata[u].has(v); }); }
 
   V vertexData(int u)   const { return hasVertex(u)? vdata[u] : V(); }
   void setVertexData(int u, V d) { if (hasVertex(u)) vdata[u] = d; }
-  E edgeData(int u, int v)   const { return hasEdge(u, v)? edata[u][ei(u, v)] : E(); }
-  void setEdgeData(int u, int v, E d) { if (hasEdge(u, v)) edata[u][ei(u, v)] = d; }
+  E edgeData(int u, int v)   const { return hasEdge(u, v)? edata[u].get(v) : E(); }
+  void setEdgeData(int u, int v, E d) { if (hasEdge(u, v)) edata[u].set(v, d); }
 
   // Write operations
   public:
   void addVertex(int u, V d=V()) {
     if (hasVertex(u)) return;
-    if (u >= s()) {
+    if (u >= span()) {
       vex.resize(u+1);
-      vto.resize(u+1);
-      edata.resize(u+1);
       vdata.resize(u+1);
+      edata.resize(u+1);
     }
     vex[u] = true;
     vdata[u] = d;
@@ -72,23 +69,19 @@ class DiGraphUnsorted {
     if (hasEdge(u, v)) return;
     addVertex(u);
     addVertex(v);
-    vto[u].push_back(v);
-    edata[u].push_back(d);
+    edata[u].add(v, d);
     M++;
   }
 
   void removeEdge(int u, int v) {
     if (!hasEdge(u, v)) return;
-    int o = ei(u, v);
-    eraseIndex(vto[u], o);
-    eraseIndex(edata[u], o);
+    edata[u].remove(v);
     M--;
   }
 
   void removeEdges(int u) {
     if (!hasVertex(u)) return;
     M -= degree(u);
-    vto[u].clear();
     edata[u].clear();
   }
 

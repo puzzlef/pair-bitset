@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-src="pagerank-static-vs-dynamic"
+src="bitset-sorted-vs-unsorted"
 out="/home/resources/Documents/subhajit/$src.log"
 ulimit -s unlimited
 printf "" > "$out"
