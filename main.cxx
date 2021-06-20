@@ -26,7 +26,7 @@ void runPagerankBatch(const string& data, bool show, int batch, int skip) {
   vector<float> *initStatic  = nullptr;
   vector<float> *initDynamic = &ranksAdj;
 
-  DiGraph<> x;
+  DiGraphUnsorted<> x;
   stringstream s(data);
   auto ksOld = vertices(x);
   while(readSnapTemporal(x, s, batch)) {

@@ -12,6 +12,7 @@ using std::set_difference;
 using std::count;
 using std::count_if;
 using std::find;
+using std::lower_bound;
 
 
 
@@ -27,6 +28,23 @@ auto find(const J& x, const T& v) {
 template <class J, class T>
 int findIndex(const J& x, const T& v) {
   auto i = find(x.begin(), x.end(), v);
+  return i==x.end()? -1 : i-x.begin();
+}
+
+
+
+
+// LOWER-BOUND
+// -----------
+
+template <class J, class T>
+auto lowerBound(const J& x, const T& v) {
+  return lower_bound(x.begin(), x.end(), v);
+}
+
+template <class J, class T>
+auto lowerBoundIndex(const J& x, const T& v) {
+  auto i = lower_bound(x.begin(), x.end(), v);
   return i==x.end()? -1 : i-x.begin();
 }
 

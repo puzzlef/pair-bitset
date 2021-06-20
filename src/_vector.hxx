@@ -42,6 +42,22 @@ void reorder(vector<T>& x, vector<int> is) {
 
 
 
+// INSERT
+// ------
+
+template <class T>
+void insertIndex(vector<T>& a, int i, const T& v) {
+  a.insert(a.begin()+i, v);
+}
+
+template <class T>
+void insertIndex(vector<T>& a, int i, size_t n, const T& v) {
+  a.insert(a.begin()+i, n, v);
+}
+
+
+
+
 // ERASE
 // -----
 

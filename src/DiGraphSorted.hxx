@@ -11,11 +11,11 @@ using std::cout;
 
 
 
-// DI-GRAPH
-// --------
+// DI-GRAPH SORTED
+// ---------------
 
 template <class V=NONE, class E=NONE>
-class DiGraph {
+class DiGraphSorted {
   public:
   using TVertex = V;
   using TEdge   = E;
@@ -31,7 +31,10 @@ class DiGraph {
   // Cute helpers
   private:
   int s() const { return vto.size(); }
-  int ei(int u, int v) const { return findIndex(vto[u], v); }
+  int ei(int u, int v) const {
+    int i = lowerBoundIndex(vto[u], v);
+    return i<0 || vto[u][i]!=v? -1 : i;
+  }
 
   // Read operations
   public:
@@ -72,8 +75,9 @@ class DiGraph {
     if (hasEdge(u, v)) return;
     addVertex(u);
     addVertex(v);
-    vto[u].push_back(v);
-    edata[u].push_back(d);
+    int i = lowerBound(vto[u], v)-vb;
+    insertIndex(vto[u], i, v);
+    insertIndex(edata[u], i, d);
     M++;
   }
 
@@ -114,7 +118,7 @@ class DiGraph {
 // --------------
 
 template <class V, class E>
-void write(ostream& a, const DiGraph<V, E>& x, bool all=false) {
+void write(ostream& a, const DiGraphSorted<V, E>& x, bool all=false) {
   a << "order: " << x.order() << " size: " << x.size();
   if (!all) { a << " {}"; return; }
   a << " {\n";
@@ -128,7 +132,7 @@ void write(ostream& a, const DiGraph<V, E>& x, bool all=false) {
 }
 
 template <class V, class E>
-ostream& operator<<(ostream& a, const DiGraph<V, E>& x) {
+ostream& operator<<(ostream& a, const DiGraphSorted<V, E>& x) {
   write(a, x);
   return a;
 }

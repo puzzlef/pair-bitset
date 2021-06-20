@@ -1,5 +1,5 @@
 #pragma once
-#include "DiGraph.hxx"
+#include "DiGraphUnsorted.hxx"
 
 
 
@@ -42,6 +42,6 @@ void transposeWithDegree(H& a, const G& x) {
 template <class G>
 auto transposeWithDegree(const G& x) {
   using E = typename G::TEdge;
-  DiGraph<int, E> a; transposeWithDegree(a, x);
+  DiGraphUnsorted<int, E> a; transposeWithDegree(a, x);
   return a;
 }
