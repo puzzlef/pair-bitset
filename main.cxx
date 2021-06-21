@@ -13,48 +13,56 @@ using namespace std;
 
 
 
-void runExptBatch(const string& data, bool show, int batch, int skip) {
-  DiGraphSorted<> x1;
-  DiGraphUnsorted<> x2;
-  stringstream s1(data);
-  stringstream s2(data);
-  vector<int> ks1, ks2;
-  bool read1, read2;
-  float t1, t2;
+template <class G>
+float runReadSnapTemporal(G& x, const string& data, int batch) {
+  int repeat = 5;
+  return measureDurationMarked([&](auto mark) {
+    x.clear();
+    stringstream s(data);
+    mark([&] { readSnapTemporal(x, s, batch); });
+  }, repeat);
+}
 
-  while (true) {
-    t1 = measureDuration([&] { read1 = readSnapTemporal(x1, s1, batch); });
-    t2 = measureDuration([&] { read2 = readSnapTemporal(x2, s2, batch); });
-    print(x1); printf(" [%09.3f ms] readSnapTemporal [sorted]\n", t1);
-    print(x2); printf(" [%09.3f ms] readSnapTemporal [unsorted]\n", t2);
-    if (!read1 || !read2) break;
-    ks1 = vertices(x1);
-    ks2 = vertices(x2);
-    DiGraphSorted<int> xt1;
-    DiGraphUnsorted<int> xt2;
-    t1 = measureDuration([&] { transposeWithDegree(xt1, x1); });
-    t2 = measureDuration([&] { transposeWithDegree(xt2, x2); });
-    print(x1); printf(" [%09.3f ms] transposeWithDegree [sorted]\n", t1);
-    print(x2); printf(" [%09.3f ms] transposeWithDegree [unsorted]\n", t2);
 
-    // Skip some edges (to speed up execution)
-    if (skip) {
-      if (!readSnapTemporal(x1, s1, skip)) break;
-      if (!readSnapTemporal(x2, s2, skip)) break;
-    }
-  }
+template <class G, class H>
+float runTransposeWithDegree(H& xt, const G& x) {
+  int repeat = 5;
+  return measureDurationMarked([&](auto mark) {
+    xt.clear();
+    mark([&] { transposeWithDegree(xt, x); });
+  }, repeat);
+}
+
+
+void runExptBatch(const string& data, bool show, int batch) {
+  DiGraph<> x1;
+  DiGraph<> x2;
+  DiGraph<int> xt1;
+  DiGraph<int> xt2;
+
+  // Read temporal edges to sorted BitSet based DiGraph.
+  float t1 = runReadSnapTemporal(x1, data, batch);
+  print(x1); printf(" [%09.3f ms] readSnapTemporal [sorted]\n", t1);
+
+  // Read temporal edges to unsorted BitSet based DiGraph.
+  float t2 = runReadSnapTemporal(x2, data, batch);
+  print(x2); printf(" [%09.3f ms] readSnapTemporal [unsorted]\n", t2);
+
+  // Transpose sorted BitSet based DiGraph.
+  float t3 = runTransposeWithDegree(xt1, x1);
+  print(xt1); printf(" [%09.3f ms] transposeWithDegree [sorted]\n", t3);
+
+  // Transpose unsorted BitSet based DiGraph.
+  float t4 = runTransposeWithDegree(xt2, x2);
+  print(xt2); printf(" [%09.3f ms] transposeWithDegree [unsorted]\n", t4);
 }
 
 
 void runExpt(const string& data, bool show) {
-  int M = countLines(data), steps = 100;
+  int M = countLines(data);
   printf("Temporal edges: %d\n\n", M);
-  for (int batch=1000, i=0; batch<M; batch*=i&1? 2:5, i++) {
-    int skip = max(M/steps - batch, 0);
-    printf("# Batch size %.0e\n", (double) batch);
-    runExptBatch(data, show, batch, skip);
-    printf("\n");
-  }
+  for (int batch=1000, i=0; batch<M; batch*=i&1? 2:5, i++)
+    runExptBatch(data, show, batch);
 }
 
 
@@ -64,5 +72,6 @@ int main(int argc, char **argv) {
   printf("Using graph %s ...\n", file);
   string d = readFile(file);
   runExpt(d, show);
+  printf("\n");
   return 0;
 }
