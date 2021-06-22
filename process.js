@@ -1,10 +1,11 @@
 const fs = require('fs');
 const os = require('os');
+const path = require('path');
 
-const RGRAPH = /^Using graph .*\/(.*?) \.\.\./m;
+const RGRAPH = /^Using graph .*\/(.*?)\.txt \.\.\./m;
 const RTEMPE = /^Temporal edges: (\d+)/m;
 const RBATCH = /^# Batch size ([\d\.e+-]+)/;
-const RRESLT = /^order: (\d+) size: (\d+) \{\} \[(.*?) ms; (\d+) iters\.\] \[(.*?) err\.\] (.*)/m;
+const RRESLT = /^order: (\d+) size: (\d+) \{\} \[(.*?) ms\] (.*)/m;
 
 
 
@@ -74,7 +75,7 @@ function readLogLine(ln, data, state) {
     state.batch_size = parseFloat(batch_size);
   }
   else if (RRESLT.test(ln)) {
-    var [, order, size, time, iters, err, technique] = RRESLT.exec(ln);
+    var [, order, size, time, technique] = RRESLT.exec(ln);
     data.get(state.graph).push({
       graph: state.graph,
       temporal_edges: state.temporal_edges,
@@ -82,8 +83,6 @@ function readLogLine(ln, data, state) {
       order: parseFloat(order),
       size: parseFloat(size),
       time: parseFloat(time),
-      iterations: parseFloat(iters),
-      error: parseFloat(err),
       technique
     });
   }
@@ -116,9 +115,7 @@ function processBatchAverage(rows) {
   for (var technique of techniques) {
     var rows_filt = rows.filter(r => r.technique===technique);
     var time = avgArray(rows_filt.map(r => r.time));
-    var iterations = avgArray(rows_filt.map(r => r.iterations));
-    var error = avgArray(rows_filt.map(r => r.error));
-    a.push({graph, order, size, batch_size, technique, time, iterations, error});
+    a.push({graph, order, size, batch_size, technique, time});
   }
   return a;
 }
@@ -159,15 +156,13 @@ function processShortLog(data) {
       a += `# Batch size ${batch_size.toExponential(0)}\n`;
       for (var r of processBatchAverage(rows_filt)) {
         var time = r.time.toFixed(3).padStart(9, '0');
-        var iterations = r.iterations.toFixed(0).padStart(3, '0');
-        var error = r.error.toExponential(4);
-        a += `[${time} ms; ${iterations} iters.] [${error} err.] ${r.technique}\n`;
+        a += `[${time} ms] ${r.technique}\n`;
       }
       a += `\n`;
     }
     a += '\n';
   }
-  return a;
+  return a.trim()+'\n';
 }
 
 
@@ -178,14 +173,25 @@ function processShortLog(data) {
 
 function main(cmd, log, out) {
   var data = readLog(log);
+  if (path.extname(out)==='') cmd += '-dir';
   switch (cmd) {
     case 'csv':
       var rows = processCsv(data);
       writeCsv(out, rows);
       break;
+    case 'csv-dir':
+      for (var [graph, rows] of data)
+        writeCsv(path.join(out, graph+'.csv'), rows);
+      break;
     case 'short-csv':
       var rows = processShortCsv(data);
       writeCsv(out, rows);
+      break;
+    case 'short-csv-dir':
+      for (var [graph, rows] of data) {
+        var rows = processShortCsv(new Map([[graph, rows]]));
+        writeCsv(path.join(out, graph+'.csv'), rows);
+      }
       break;
     case 'short-log':
       var text = processShortLog(data);
