@@ -1,60 +1,75 @@
 #pragma once
 #include "_main.hxx"
-#include <utility>
-#include <vector>
-#include <algorithm>
-
-using std::pair;
-using std::vector;
-using std::iter_swap;
-using std::find_if;
+#include "BitsetMonolithic.hxx"
+#include "BitsetSubrange16.hxx"
 
 
 
 
 template <class T=NONE>
 class BitsetSwitched {
-  vector<pair<int, T>> ids;
+  BitsetMonolithic<T> mono;
+  BitsetSubrange16<T> subr;
+  int switchPoint;
 
-  // Cute helpers
-  private:
-  auto lookup(int id) const {
-    auto fn = [&](const auto& e) { return e.first == id; };
-    return find_if(ids.begin(), ids.end(), fn);
+  public:
+  BitsetSwitched(int switchPoint) :
+  switchPoint(switchPoint) {}
+
+  // Which mode?
+  bool isMonolithic() const { return mono.size() > 0; }
+  bool isSubrange16() const { return !isMonolithic(); }
+
+  void useMonolithic() {
+    if (isMonolithic()) return;
+    mono.clear();
+    for (const auto& [id, v] : subr.entries())
+      mono.add(id, v):
+    subr.clear();
   }
+
+  void useSubrange16() {
+    if (isSubrange16()) return;
+    subr.clear();
+    for (const auto& [id, v] : mono.entries())
+      subr.add(id, v):
+    mono.clear();
+  }
+
 
   // Read as iterable.
   public:
-  auto entries() const { return transform(ids, [](const auto& e) { return e; }); }
-  auto keys()    const { return transform(ids, [](const auto& e) { return e.first; }); }
-  auto values()  const { return transform(ids, [](const auto& e) { return e.second; }); }
+  auto entries() const { return ternaryIter(isMonolithic(), mono.entries(), subr.entries()); }
+  auto keys()    const { return ternaryIter(isMonolithic(), mono.keys(),    subr.keys()); }
+  auto values()  const { return ternaryIter(isMonolithic(), mono.values(),  subr.values()); }
 
   // Read operations.
   public:
-  size_t size()      const { return ids.size(); }
-  bool   has(int id) const { return lookup(id) != ids.end(); }
-  T      get(int id) const { auto it = lookup(id); return it == ids.end()? T() : (*it).second; }
+  size_t size()      const { return isMonolithic()? mono.size()  : subr.size(); }
+  bool   has(int id) const { return isMonolithic()? mono.has(id) : subr.has(id); }
+  T      get(int id) const { return isMonolithic()? mono.get(id) : subr.get(id); }
 
   // Write operations
   public:
   void clear() {
-    ids.clear();
+    mono.clear();
+    subr.clear();
   }
 
   void set(int id, T v) {
-    auto it = lookup(id);
-    if (it == ids.end()) return;
-    (*it).second = v;
+    if (isMonolithic()) mono.set(id, v);
+    else subr.set(id, v);
   }
 
   void add(int id, T v=T()) {
-    if (!has(id)) ids.push_back({id, v});
+    if (isMonolithic() && size()>=switchPoint) useSubrange16();
+    if (isMonolithic()) mono.add(id, v);
+    else subr.add(id, v);
   }
 
   void remove(int id) {
-    auto it = lookup(id);
-    if (it == ids.end()) return;
-    iter_swap(it, ids.end()-1);
-    ids.pop_back();
+    if (isSubrange16() && size()<switchPoint/2) useMonolithic();
+    if (isMonolithic()) mono.remove(id);
+    else subr.remove(id);
   }
 };

@@ -30,6 +30,11 @@ class DiGraph {
   vector<V>    vdata;
   vector<Bitset<E>> edata;
   int N = 0, M = 0;
+  int switchPoint = 0;
+
+  public:
+  DiGraph(int switchPoint)
+  : switchPoint(switchPoint) {}
 
   // Read operations
   public:
@@ -65,7 +70,7 @@ class DiGraph {
     if (u >= span()) {
       vex.resize(u+1);
       vdata.resize(u+1);
-      edata.resize(u+1);
+      edata.resize(u+1, Bitset(switchPoint));
     }
     vex[u] = true;
     vdata[u] = d;
