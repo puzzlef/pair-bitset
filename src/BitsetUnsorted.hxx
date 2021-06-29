@@ -26,7 +26,7 @@ class BitsetUnsorted {
   // Cute helpers.
   protected:
   static uint16_t hi(int id) { return id >> 16; }
-  static uint16_t lo(int id) { return id & 0xFF; }
+  static uint16_t lo(int id) { return id & 0xFFFF; }
   static int full(uint16_t hi, uint16_t lo) { return (hi<<16) | lo; }
 
   protected:
@@ -75,7 +75,7 @@ class BitsetUnsorted {
       return l.i==r.i && l.j==r.j;
     }
     friend bool operator!=(const iterator& l, const iterator& r) {
-      return l.i!=r.i && l.j!=r.j;
+      return l.i!=r.i || l.j!=r.j;
     }
   };
 
