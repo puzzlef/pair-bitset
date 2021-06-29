@@ -28,10 +28,16 @@ class BitsetUnsorted {
   static int full(uint16_t hi, uint16_t lo) { return (hi<<16) | lo; }
 
   protected:
-  pair<int, int> lookup(int id) const {
+  auto getEntry(int i, int j) {
+      const auto& hi = highs[i];
+      const auto& lo = lows[i][j];
+      return make_pair(full(hi, lo.first), lo.second);
+  }
+
+  auto lookup(int id) const {
     int i = findEqIndex(highs, hi(id));
     int j = i<0? -1 : findIfEqIndex(lows, [&](const auto& e) { return e.first==lo(id); });
-    return {i, j};
+    return make_pair(i, j);
   }
 
 
@@ -51,11 +57,7 @@ class BitsetUnsorted {
 
     public:
     Iterator(int i, int j) : i(i), j(j) {}
-    reference operator*() const {
-      const auto& hi = highs[i];
-      const auto& lo = lows[i][j];
-      return make_pair(full(hi, lo.first), lo.second);
-    }
+    reference operator*() const { return getEntry(i, j); }
     iterator& operator++() {
       if (lows[i].size() >= ++j) { ++i; j = 0; }
       return *this;
@@ -115,7 +117,7 @@ class BitsetUnsorted {
     auto [i, j] = lookup(id);
     if (i>=0 && j>=0) return;
     if (i<0) highs.push_back(hi(id));
-    lows.push_back({lo(id), v});
+    lows.push_back(make_pair(lo(id), v));
   }
 
   void remove(int id) {
@@ -123,5 +125,8 @@ class BitsetUnsorted {
     if (i<0 || j<0) return;
     swap(lows[i].back(), lows[i][j]);
     lows[i].pop_back();
+    if (!lows[i].empty()) break;
+    eraseIndex(lows, i);
+    eraseIndex(highs, i);
   }
 };
