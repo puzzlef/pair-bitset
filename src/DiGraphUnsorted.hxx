@@ -3,7 +3,7 @@
 #include <ostream>
 #include <iostream>
 #include "_main.hxx"
-#include "BitSetUnsorted.hxx"
+#include "BitsetUnsorted.hxx"
 
 using std::vector;
 using std::ostream;
@@ -18,17 +18,17 @@ using std::cout;
 template <class V=NONE, class E=NONE>
 class DiGraphUnsorted {
   template <class T>
-  using BitSet = BitSetUnsorted<T>;
+  using Bitset = BitsetUnsorted<T>;
 
   public:
   using TVertex = V;
   using TEdge   = E;
 
   private:
-  BitSet<E>    none;
+  Bitset<E>    none;
   vector<bool> vex;
   vector<V>    vdata;
-  vector<BitSet<E>> edata;
+  vector<Bitset<E>> edata;
   int N = 0, M = 0;
 
   // Read operations
@@ -41,10 +41,10 @@ class DiGraphUnsorted {
   bool hasEdge(int u, int v) const { return u < span() && edata[u].has(v); }
   auto edges(int u)          const { return u < span()? edata[u].keys() : none.keys(); }
   int degree(int u)          const { return u < span()? edata[u].size() : 0; }
-  auto vertices()      const { return filter(range(span()), [&](int u) { return  vex[u]; }); }
-  auto nonVertices()   const { return filter(range(span()), [&](int u) { return !vex[u]; }); }
-  auto inEdges(int v)  const { return filter(range(span()), [&](int u) { return edata[u].has(v); }); }
-  int inDegree(int v) const { return countIf(range(span()), [&](int u) { return edata[u].has(v); }); }
+  auto vertices()      const { return filterIter(rangeIter(span()), [&](int u) { return  vex[u]; }); }
+  auto nonVertices()   const { return filterIter(rangeIter(span()), [&](int u) { return !vex[u]; }); }
+  auto inEdges(int v)  const { return filterIter(rangeIter(span()), [&](int u) { return edata[u].has(v); }); }
+  int inDegree(int v) const { return countIf(rangeIter(span()), [&](int u) { return edata[u].has(v); }); }
 
   V vertexData(int u)   const { return hasVertex(u)? vdata[u] : V(); }
   void setVertexData(int u, V d) { if (hasVertex(u)) vdata[u] = d; }
@@ -53,6 +53,13 @@ class DiGraphUnsorted {
 
   // Write operations
   public:
+  void clear() {
+    vex.clear();
+    vdata.clear();
+    edata.clear();
+    N = 0; M = 0;
+  }
+
   void addVertex(int u, V d=V()) {
     if (hasVertex(u)) return;
     if (u >= span()) {
