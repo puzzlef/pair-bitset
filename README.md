@@ -1,18 +1,16 @@
-Testing the effectiveness of **sorted** vs **unsorted** list of integers for BitSet.
+Comparing **sorted** vs **unsorted** for *16-bit subrange* based BitSet.
 
 This experiment was for comparing performance between:
 1. Read graph edges to **sorted bitset** based DiGraph & transpose.
 2. Read graph edges to **unsorted bitset** based DiGraph & transpose.
 
 Each approach was attempted on a number of temporal graphs, running each with
-multiple batch sizes (`1`, `5`, `10`, `50`, ...). Each batch size was run with 5
-different updates to graph, and each specific update was run 5 times for each
-approach to get a good time measure. **Transpose** of DiGraph based on
-**sorted bitset** is clearly **faster** than the *unsorted* one. However, with
-**reading graph edges** there is no clear winner (sometimes *sorted* is
-*faster* especially for large graphs, and sometimes *unsorted*). Maybe when
-new edges have many duplicates, **inserts are less**, and hence sorted version
-is faster (since sorted bitset has slow insert time).
+multiple read sizes (`1E+3`, `5E+3`, `1E+4`, `5E+4`, ...). Each read size was
+run 5 times for each approach to get a good time measure. **16-bit subrange**
+**bitset** is similar to [Roaring bitmap], which also breaks up all integers
+into buckets of 2^16 integers. Although both sorted and unsorted 16-bit
+subrange based bitsets perform similarly, on average **unsorted** approach
+performs **slightly better** than sorted approach.
 
 All outputs are saved in [out](out/) and a small part of the output is listed
 here. Some [charts] are also included below, generated from [sheets]. The input
@@ -74,7 +72,8 @@ $ ...
 # order: 2523890 size: 30385833 {} [18024.605 ms] transposeWithDegree [unsorted]
 ```
 
-[![](https://i.imgur.com/AO60Lp2.gif)][sheets]
+[![](https://i.imgur.com/T3gAkjL.gif)][sheets]
+[![](https://i.imgur.com/5Gee7xB.gif)][sheets]
 
 <br>
 <br>
@@ -83,12 +82,15 @@ $ ...
 ## References
 
 - [Stanford Large Network Dataset Collection]
+- [Roaring Bitmaps : fast data structure for inverted indexes](https://medium.com/@amit.desai03/roaring-bitmaps-fast-data-structure-for-inverted-indexes-5490fa4d1b27)
+- [Roaring bitmap]
 
 <br>
 <br>
 
-[![](https://i.imgur.com/DuJu78s.jpg)](https://www.youtube.com/watch?v=2k_ihEEZG-o)
+[![](https://i.imgur.com/WUYb26N.jpg)](https://www.youtube.com/watch?v=281ASMaXDQw)
 
 [Stanford Large Network Dataset Collection]: http://snap.stanford.edu/data/index.html
-[charts]: https://photos.app.goo.gl/c2ivFPbEXdw6ZFaM7
-[sheets]: https://docs.google.com/spreadsheets/d/1AB23nO5K71-TWe7aY6cf5Rte7jfLhfITPFBnRB_jVzM/edit?usp=sharing
+[Roaring bitmap]: https://github.com/RoaringBitmap
+[charts]: https://photos.app.goo.gl/Hv7WoJ9DK91r4yC17
+[sheets]: https://docs.google.com/spreadsheets/d/19qQ8dd_D7Yp89NOiCv5DUal0-EGKDQ6C63JccGf98Po/edit?usp=sharing
