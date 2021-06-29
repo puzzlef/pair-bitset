@@ -445,17 +445,17 @@ auto defaultValueIterator(const T& _) {
 // -------
 // Select iterator by boolean.
 
-template <class I0, class I1>
+template <class I1, class I0>
 class TernaryIterator {
   using iterator = TernaryIterator;
-  using T = typename I0::value_type;
+  using T = typename I1::value_type;
   const bool sel;
-  I0 i0;
   I1 i1;
+  I0 i0;
 
   public:
-  ITERATOR_USING_IC(I0, random_access_iterator_tag)
-  TernaryIterator(bool sel, I0 i0, I1 i1) : sel(sel), i0(i0), i1(i1) {}
+  ITERATOR_USING_IC(I1, random_access_iterator_tag)
+  TernaryIterator(bool sel, I1 i1, I0 i0) : sel(sel), i1(i1), i0(i0) {}
   ITERATOR_DEREF(iterator, n, sel? *i1 : *i0, sel? i1[n] : i0[n])
   ITERATOR_PTR(iterator, sel? i1.I1::operator->() : i0.I0::operator->())
   ITERATOR_NEXTP(iterator, if (sel) { ++i1; } else { ++i0; })
@@ -468,15 +468,15 @@ class TernaryIterator {
 };
 
 
-template <class I0, class I1>
-auto ternaryIterator(bool sel, I0 i0, I1 i1) {
-  return TernaryIterator<I0, I1>(sel, i0, i1);
+template <class I1, class I0>
+auto ternaryIterator(bool sel, I1 i1, I0 i0) {
+  return TernaryIterator<I1, I0>(sel, i1, i0);
 }
 
-template <class J0, class J1>
-auto ternaryIter(bool sel, const J0& x0, const J1& x1) {
-  auto b = ternaryIterator(sel, x0.begin(), x1.begin());
-  auto e = ternaryIterator(sel, x0.end(), x1.end());
+template <class J1, class J0>
+auto ternaryIter(bool sel, const J1& x1, const J0& x0) {
+  auto b = ternaryIterator(sel, x1.begin(), x0.begin());
+  auto e = ternaryIterator(sel, x1.end(), x0.end());
   return makeIter(b, e);
 }
 

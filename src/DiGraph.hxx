@@ -34,7 +34,7 @@ class DiGraph {
 
   public:
   DiGraph(int switchPoint)
-  : switchPoint(switchPoint) {}
+  : switchPoint(switchPoint), none(Bitset<E>(switchPoint)) {}
 
   // Read operations
   public:
@@ -70,7 +70,7 @@ class DiGraph {
     if (u >= span()) {
       vex.resize(u+1);
       vdata.resize(u+1);
-      edata.resize(u+1, Bitset(switchPoint));
+      edata.resize(u+1, Bitset<E>(switchPoint));
     }
     vex[u] = true;
     vdata[u] = d;

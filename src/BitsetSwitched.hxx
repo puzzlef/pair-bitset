@@ -17,14 +17,14 @@ class BitsetSwitched {
   switchPoint(switchPoint) {}
 
   // Which mode?
-  bool isMonolithic() const { return mono.size() > 0; }
+  bool isMonolithic() const { return subr.size() == 0; }
   bool isSubrange16() const { return !isMonolithic(); }
 
   void useMonolithic() {
     if (isMonolithic()) return;
     mono.clear();
     for (const auto& [id, v] : subr.entries())
-      mono.add(id, v):
+      mono.add(id, v);
     subr.clear();
   }
 
@@ -32,7 +32,7 @@ class BitsetSwitched {
     if (isSubrange16()) return;
     subr.clear();
     for (const auto& [id, v] : mono.entries())
-      subr.add(id, v):
+      subr.add(id, v);
     mono.clear();
   }
 

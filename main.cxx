@@ -34,35 +34,26 @@ float runTransposeWithDegree(H& xt, const G& x) {
 }
 
 
-void runExptBatch(const string& data, bool show, int batch) {
-  DiGraph<> x1;
-  DiGraph<> x2;
-  DiGraph<int> xt1;
-  DiGraph<int> xt2;
+void runExptBatch(const string& data, bool show, int batch, int switchPoint) {
+  DiGraph<> x(switchPoint);
+  DiGraph<int> xt(switchPoint);
 
-  // Read temporal edges to sorted BitSet based DiGraph.
-  float t1 = runReadSnapTemporal(x1, data, batch);
-  print(x1); printf(" [%09.3f ms] readSnapTemporal [sorted]\n", t1);
+  // Read temporal edges to switched BitSet based DiGraph.
+  float t1 = runReadSnapTemporal(x, data, batch);
+  print(x); printf(" [%09.3f ms; switch-point=%d] readSnapTemporal\n", switchPoint, t1);
 
-  // Read temporal edges to unsorted BitSet based DiGraph.
-  float t2 = runReadSnapTemporal(x2, data, batch);
-  print(x2); printf(" [%09.3f ms] readSnapTemporal [unsorted]\n", t2);
-
-  // Transpose sorted BitSet based DiGraph.
-  float t3 = runTransposeWithDegree(xt1, x1);
-  print(xt1); printf(" [%09.3f ms] transposeWithDegree [sorted]\n", t3);
-
-  // Transpose unsorted BitSet based DiGraph.
-  float t4 = runTransposeWithDegree(xt2, x2);
-  print(xt2); printf(" [%09.3f ms] transposeWithDegree [unsorted]\n", t4);
+  // Transpose switched BitSet based DiGraph.
+  float t2 = runTransposeWithDegree(xt, x);
+  print(xt); printf(" [%09.3f ms; switch-point=%d] transposeWithDegree\n", switchPoint, t2);
 }
 
 
 void runExpt(const string& data, bool show) {
   int M = countLines(data);
   printf("Temporal edges: %d\n\n", M);
-  for (int batch=1000, i=0; batch<M; batch*=i&1? 2:5, i++)
-    runExptBatch(data, show, batch);
+  runExptBatch(data, show, M, 0);
+  for (int switchPoint=1, i=0; switchPoint<M; switchPoint*=i&1? 2:5, i++)
+    runExptBatch(data, show, M, switchPoint);
 }
 
 
