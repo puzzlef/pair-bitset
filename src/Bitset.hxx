@@ -7,6 +7,7 @@
 using std::pair;
 using std::vector;
 using std::lower_bound;
+using std::find_if;
 using std::merge;
 using std::min;
 
@@ -17,25 +18,30 @@ template <class T=NONE>
 class Bitset {
   int  sorted;
   vector<pair<int, T>> data;
-  const bool unsortedFirst;
-  const int  unsortedLimit;
+  bool unsortedFirst;
+  int  unsortedLimit;
 
   // Cute helpers
   private:
-  inline int unsorted() const {
-    return data.size() - sorted;
-  }
+  inline int  unsorted() const { return data.size() - sorted; }
+  inline auto cbegin()  const { return data.begin(); }
+  inline auto cmiddle() const { return data.begin() + sorted; }
+  inline auto cend()    const { return data.end(); }
+  inline auto begin()  { return data.begin(); }
+  inline auto middle() { return data.begin() + sorted; }
+  inline auto end()    { return data.end(); }
 
   inline int lookupSorted(int id) const {
     auto fl = [](const auto& e, int id) { return e.first <  id; };
     auto fe = [](const auto& e, int id) { return e.first == id; };
-    return lowerBoundEqIndex(sliceIter(data, 0, sorted), id, fl, fe);
+    auto it = lower_bound(cbegin(), cmiddle(), id, fl);
+    return it==cend() || (*it).first!=id? -1 : it-cbegin();
   }
 
   inline int lookupUnsorted(int id) const {
     auto fe = [&](const auto& e) { return e.first == id; };
-    int   i = findIfIndex(sliceIter(data, sorted), fe);
-    return i==unsorted()? -1 : sorted+i;
+    auto it = find_if(cmiddle(), cend(), fe);
+    return it==cend()? -1 : it-cbegin();
   }
 
   inline int lookupSortedFirst(int id) const {
@@ -48,37 +54,34 @@ class Bitset {
     return i>=0? i : lookupSorted(id);
   }
 
-  auto lookup(int id) const {
+  inline int lookup(int id) const {
     if (unsortedFirst) return lookupUnsortedFirst(id);
     return lookupSortedFirst(id);
   }
 
-  void mergeUnsorted() {
-    auto ib = data.begin();
-    auto im = data.begin() + sorted();
-    auto ie = data.end();
-    sort(im, ie);
-    merge(ib, im, im, ie, ib);
+  inline void mergeUnsorted() {
+    auto fl = [](const auto& e, const auto& f) { return e.first < f.first; };
+    sort(begin(), end(), fl);
     sorted = data.size();
   }
 
-  void mergeAuto() {
+  inline void mergeAuto() {
     if (unsorted() <= unsortedLimit) return;
     mergeUnsorted();
   }
 
-  void removeAtSorted(int i) {
+  inline void removeAtSorted(int i) {
     eraseIndex(data, i);
   }
 
-  void removeAtUnsorted(int i) {
+  inline void removeAtUnsorted(int i) {
     int l = data.size()-1;
     sorted = min(sorted, i);
     swap(data[i], data[l]);
     data.pop_back();
   }
 
-  void removeAt(int i) {
+  inline void removeAt(int i) {
     int UB = data.size() - unsortedLimit;
     if (i<UB) removeAtSorted(i);
     else removeAtUnsorted(i);

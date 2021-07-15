@@ -27,13 +27,13 @@ class DiGraph {
   vector<V>    vdata;
   vector<Bitset<E>> edata;
   int N = 0, M = 0;
-  const bool unsortedFirst;
-  const int  unsortedLimit;
+  bool unsortedFirst;
+  int  unsortedLimit;
 
   public:
   DiGraph(bool unsortedFirst, int unsortedLimit) :
-  unsortedFirst(unsortedFirst), unsortedLimit(unsortedLimit),
-  none(Bitset<E>(unsortedFirst, unsortedLimit)) {}
+  none(Bitset<E>(unsortedFirst, unsortedLimit)), vex(), vdata(), edata(),
+  unsortedFirst(unsortedFirst), unsortedLimit(unsortedLimit) {}
 
   // Read operations
   public:

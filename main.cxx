@@ -13,56 +13,47 @@ using namespace std;
 
 
 
-void runExptBatch(const string& data, bool show, int batch, int skip) {
-  DiGraphSorted<> x1;
-  DiGraphUnsorted<> x2;
-  stringstream s1(data);
-  stringstream s2(data);
-  vector<int> ks1, ks2;
-  bool read1, read2;
-  float t1, t2;
+void runExptConfig(const string& data, int repeat, int edges, bool unsortedFirst, int unsortedLimit) {
+  DiGraph<> x(unsortedFirst, unsortedLimit);
+  DiGraph<int> xt(unsortedFirst, unsortedLimit);
 
-  while (true) {
-    t1 = measureDuration([&] { read1 = readSnapTemporal(x1, s1, batch); });
-    t2 = measureDuration([&] { read2 = readSnapTemporal(x2, s2, batch); });
-    print(x1); printf(" [%09.3f ms] readSnapTemporal [sorted]\n", t1);
-    print(x2); printf(" [%09.3f ms] readSnapTemporal [unsorted]\n", t2);
-    if (!read1 || !read2) break;
-    ks1 = vertices(x1);
-    ks2 = vertices(x2);
-    DiGraphSorted<int> xt1;
-    DiGraphUnsorted<int> xt2;
-    t1 = measureDuration([&] { transposeWithDegree(xt1, x1); });
-    t2 = measureDuration([&] { transposeWithDegree(xt2, x2); });
-    print(x1); printf(" [%09.3f ms] transposeWithDegree [sorted]\n", t1);
-    print(x2); printf(" [%09.3f ms] transposeWithDegree [unsorted]\n", t2);
+  // Read temporal graph.
+  float t1 = measureDurationMarked([&](auto mark) {
+    x.clear();
+    stringstream s(data);
+    mark([&] { readSnapTemporal(x, s, edges); });
+  }, repeat);
+  print(x); printf(" [%09.3f ms; unsorted-first=%d; unsorted-limit=%d] readSnapTemporal\n", t1, unsortedFirst, unsortedLimit);
 
-    // Skip some edges (to speed up execution)
-    if (skip) {
-      if (!readSnapTemporal(x1, s1, skip)) break;
-      if (!readSnapTemporal(x2, s2, skip)) break;
-    }
-  }
+  // Transpose graph.
+  float t2 = measureDurationMarked([&](auto mark) {
+    xt.clear();
+    mark([&] { transposeWithDegree(xt, x); });
+  }, repeat);
+  print(xt); printf(" [%09.3f ms; unsorted-first=%d; unsorted-limit=%d] transposeWithDegree\n", t2, unsortedFirst, unsortedLimit);
 }
 
 
-void runExpt(const string& data, bool show) {
-  int M = countLines(data), steps = 100;
-  printf("Temporal edges: %d\n\n", M);
-  for (int batch=1000, i=0; batch<M; batch*=i&1? 2:5, i++) {
-    int skip = max(M/steps - batch, 0);
-    printf("# Batch size %.0e\n", (double) batch);
-    runExptBatch(data, show, batch, skip);
-    printf("\n");
+void runExpt(const string& data, int repeat) {
+  int edges = countLines(data);
+  int limitBegin = 1, limitEnd = 10000;
+  printf("Temporal edges: %d\n", edges);
+  for (int P=1; P<=limitEnd; P*=10) {
+    for (int limit=P; limit<P*10; limit+=P) {
+      if (limit > limitEnd) break;
+      runExptConfig(data, repeat, edges, false, limit);
+      runExptConfig(data, repeat, edges, true,  limit);
+    }
   }
 }
 
 
 int main(int argc, char **argv) {
   char *file = argv[1];
-  bool  show = argc > 2;
+  int repeat = argc>2? stoi(argv[2]) : 1;
   printf("Using graph %s ...\n", file);
   string d = readFile(file);
-  runExpt(d, show);
+  runExpt(d, repeat);
+  printf("\n");
   return 0;
 }

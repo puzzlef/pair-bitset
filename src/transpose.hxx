@@ -38,10 +38,3 @@ void transposeWithDegree(H& a, const G& x) {
       a.addEdge(v, u, x.edgeData(u, v));
   }
 }
-
-template <class G>
-auto transposeWithDegree(const G& x) {
-  using E = typename G::TEdge;
-  DiGraphUnsorted<int, E> a; transposeWithDegree(a, x);
-  return a;
-}
