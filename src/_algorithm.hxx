@@ -73,8 +73,8 @@ auto lowerBound(const J& x, const T& v) {
 }
 
 template <class J, class T, class F>
-auto lowerBound(const J& x, const T& v, F fc) {
-  return lower_bound(x.begin(), x.end(), v, fc);
+auto lowerBound(const J& x, const T& v, F fe) {
+  return lower_bound(x.begin(), x.end(), v, fe);
 }
 
 template <class J, class T>
@@ -83,8 +83,8 @@ int lowerBoundIndex(const J& x, const T& v) {
 }
 
 template <class J, class T, class F>
-int lowerBoundIndex(const J& x, const T& v, F fc) {
-  return lower_bound(x.begin(), x.end(), v, fc) - x.begin();
+int lowerBoundIndex(const J& x, const T& v, F fl) {
+  return lower_bound(x.begin(), x.end(), v, fl) - x.begin();
 }
 
 template <class J, class T>
@@ -94,9 +94,15 @@ int lowerBoundEqIndex(const J& x, const T& v) {
 }
 
 template <class J, class T, class F>
-int lowerBoundEqIndex(const J& x, const T& v, F fc) {
-  auto it = lower_bound(x.begin(), x.end(), v, fc);
+int lowerBoundEqIndex(const J& x, const T& v, F fl) {
+  auto it = lower_bound(x.begin(), x.end(), v, fl);
   return it==x.end() || *it!=v? -1 : it-x.begin();
+}
+
+template <class J, class T, class F, class G>
+int lowerBoundEqIndex(const J& x, const T& v, F fl, G fe) {
+  auto it = lower_bound(x.begin(), x.end(), v, fl);
+  return it==x.end() || !fe(*it, v)? -1 : it-x.begin();
 }
 
 
