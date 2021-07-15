@@ -17,9 +17,6 @@ using std::cout;
 
 template <class V=NONE, class E=NONE>
 class DiGraph {
-  template <class T>
-  using Bitset = BitsetSwitched<T>;
-
   public:
   using TVertex = V;
   using TEdge   = E;
@@ -30,11 +27,13 @@ class DiGraph {
   vector<V>    vdata;
   vector<Bitset<E>> edata;
   int N = 0, M = 0;
-  int switchPoint = 0;
+  const bool unsortedFirst;
+  const int  unsortedLimit;
 
   public:
-  DiGraph(int switchPoint)
-  : switchPoint(switchPoint), none(Bitset<E>(switchPoint)) {}
+  DiGraph(bool unsortedFirst, int unsortedLimit) :
+  unsortedFirst(unsortedFirst), unsortedLimit(unsortedLimit),
+  none(Bitset<E>(unsortedFirst, unsortedLimit)) {}
 
   // Read operations
   public:
@@ -70,7 +69,7 @@ class DiGraph {
     if (u >= span()) {
       vex.resize(u+1);
       vdata.resize(u+1);
-      edata.resize(u+1, Bitset<E>(switchPoint));
+      edata.resize(u+1, Bitset<E>(unsortedFirst, unsortedLimit));
     }
     vex[u] = true;
     vdata[u] = d;

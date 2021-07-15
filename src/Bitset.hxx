@@ -123,6 +123,6 @@ class Bitset {
 
   // Lifetime operations
   public:
-  Bitset(bool unsortedFirst, int unsortedLimit)
-  : sorted(), data(), unsortedFirst(unsortedFirst), unsortedLimit(unsortedLimit) {}
+  Bitset(bool unsortedFirst, int unsortedLimit) :
+  sorted(), data(), unsortedFirst(unsortedFirst), unsortedLimit(unsortedLimit) {}
 };
