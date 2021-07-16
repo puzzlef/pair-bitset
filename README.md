@@ -1,23 +1,42 @@
-Testing the effectiveness of **sorted** vs **unsorted** list of integers for BitSet.
+Comparing various **unsorted sizes** for **partially sorted** BitSet.
 
-This experiment was for comparing performance between:
-1. Read graph edges to **sorted bitset** based DiGraph & transpose.
-2. Read graph edges to **unsorted bitset** based DiGraph & transpose.
+The partially sorted bitset maintains 2 sublists in the same vector, **sorted**
+and **unsorted**. New items are added to the *unsorted sublist* at the end.
+When *unsorted sublist* grows beyond **limit**, it is merged with the *sorted*
+*sublist* (*unsorted sublist* becomes empty). Lookup can be performed in either
+the *sorted sublist* first, or the *unsorted* one.
 
-Each approach was attempted on a number of temporal graphs, running each with
-multiple batch sizes (`1`, `5`, `10`, `50`, ...). Each batch size was run with 5
-different updates to graph, and each specific update was run 5 times for each
-approach to get a good time measure. **Transpose** of DiGraph based on
-**sorted bitset** is clearly **faster** than the *unsorted* one. However, with
-**reading graph edges** there is no clear winner (sometimes *sorted* is
-*faster* especially for large graphs, and sometimes *unsorted*). Maybe when
-new edges have many duplicates, **inserts are less**, and hence sorted version
-is faster (since sorted bitset has slow insert time).
+This experiment was for comparing performance of reading graph edges
+(`readSnapTemporal`) and transpose (`transposeWithDegree`) between:
+1. Merge sublists using **sort** (modes `0`, `1`).
+2. Merge sublists **in-place** (modes `2`, `3`).
+3. Merge sublists using **extra space for sorted sublist** (modes `4`, `5`).
+4. Merge sublists using **extra space for unsorted sublist** (modes `6`, `7`).
+
+In each case given above, **lookup** in bitset is done either in **sorted**
+**sublist** first, or in **unsorted** sublist:
+1. Lookup first in **sorted sublist** (modes `0`, `2`, `4`, `6`).
+2. Lookup first in **unsorted sublist** (modes `1`, `3`, `5`, `7`).
+
+For all of the total `8` modes above, *unsorted* **limit** for **unsorted sublist**
+was adjusted with multiple sizes (`1`, `2`, `3`, ..., `10`, `20`, ..., `10000`).
+Merge using **sort** simply sorts the entire list. Merging **in-place** uses
+`std::inplace_merge()`. Merge using **extra space for sorted sublist**
+uses a shared temporary buffer for storing sorted values (which could be large)
+and then performs a `std::merge()` after sorting the *unsorted sublist*. On the
+other hand, merge using **extra space for unsorted sublist** uses a shared
+temporary buffer for storing unsorted values (which is potentially much smaller
+than the sorted sublist), and performs a *reverse merge* after sorting the
+*unsorted sublist*. From the result it appears that merging sublists **in-place**,
+and using **extra space for unsorted sublist**, both with first lookup in
+**sorted sublist** are **fast** (modes `inplace-s`=`2`, `extrau-s`=`6`). For both
+cases, a **limit** of `128` appears to be a good choice.
 
 All outputs are saved in [out](out/) and a small part of the output is listed
 here. Some [charts] are also included below, generated from [sheets]. The input
 data used for this experiment is available at the
-[Stanford Large Network Dataset Collection].
+[Stanford Large Network Dataset Collection]. This experiment was done with
+guidance from [Prof. Dip Sankar Banerjee] and [Prof. Kishore Kothapalli].
 
 <br>
 
@@ -25,88 +44,50 @@ data used for this experiment is available at the
 $ g++ -O3 main.cxx
 $ ./a.out ~/data/email-Eu-core-temporal.txt
 
-# (SHORTENED)
 # ...
 #
-# Using graph sx-stackoverflow ...
+# Using graph /home/subhajit/data/sx-stackoverflow.txt ...
 # Temporal edges: 63497051
-# order: 2601977 size: 36233450 {}
-#
-# # Batch size 1e+3
-# [00003.650 ms] readSnapTemporal [sorted]
-# [00002.289 ms] readSnapTemporal [unsorted]
-# [05808.473 ms] transposeWithDegree [sorted]
-# [16766.326 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+3
-# [00009.728 ms] readSnapTemporal [sorted]
-# [00010.450 ms] readSnapTemporal [unsorted]
-# [05893.706 ms] transposeWithDegree [sorted]
-# [16913.642 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+4
-# [00019.183 ms] readSnapTemporal [sorted]
-# [00018.723 ms] readSnapTemporal [unsorted]
-# [05894.552 ms] transposeWithDegree [sorted]
-# [16950.788 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+4
-# [00075.656 ms] readSnapTemporal [sorted]
-# [00080.469 ms] readSnapTemporal [unsorted]
-# [05909.356 ms] transposeWithDegree [sorted]
-# [16974.218 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+5
-# [00137.122 ms] readSnapTemporal [sorted]
-# [00156.376 ms] readSnapTemporal [unsorted]
-# [05853.389 ms] transposeWithDegree [sorted]
-# [16997.236 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+5
-# [00655.838 ms] readSnapTemporal [sorted]
-# [00779.563 ms] readSnapTemporal [unsorted]
-# [06244.627 ms] transposeWithDegree [sorted]
-# [17584.221 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+6
-# [01332.689 ms] readSnapTemporal [sorted]
-# [01597.662 ms] readSnapTemporal [unsorted]
-# [06975.711 ms] transposeWithDegree [sorted]
-# [18913.694 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+6
-# [06263.879 ms] readSnapTemporal [sorted]
-# [07612.980 ms] readSnapTemporal [unsorted]
-# [07603.789 ms] transposeWithDegree [sorted]
-# [20472.597 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+7
-# [10948.173 ms] readSnapTemporal [sorted]
-# [13276.812 ms] readSnapTemporal [unsorted]
-# [08421.293 ms] transposeWithDegree [sorted]
-# [23075.482 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+7
-# [29084.017 ms] readSnapTemporal [sorted]
-# [35400.736 ms] readSnapTemporal [unsorted]
-# [11465.749 ms] transposeWithDegree [sorted]
-# [34081.889 ms] transposeWithDegree [unsorted]
+# order: 2601977 size: 36233450 {} [440918.594 ms; mode=0; limit=1] readSnapTemporal
+# order: 2601977 size: 36233450 {} [38474.832 ms; mode=0; limit=1] transposeWithDegree
+# order: 2601977 size: 36233450 {} [439787.688 ms; mode=1; limit=1] readSnapTemporal
+# order: 2601977 size: 36233450 {} [39034.801 ms; mode=1; limit=1] transposeWithDegree
+# order: 2601977 size: 36233450 {} [86713.828 ms; mode=2; limit=1] readSnapTemporal
+# order: 2601977 size: 36233450 {} [16496.314 ms; mode=2; limit=1] transposeWithDegree
+# order: 2601977 size: 36233450 {} [86352.555 ms; mode=3; limit=1] readSnapTemporal
+# order: 2601977 size: 36233450 {} [17018.871 ms; mode=3; limit=1] transposeWithDegree
+# order: 2601977 size: 36233450 {} [103812.539 ms; mode=4; limit=1] readSnapTemporal
+# order: 2601977 size: 36233450 {} [20714.996 ms; mode=4; limit=1] transposeWithDegree
+# order: 2601977 size: 36233450 {} [103724.477 ms; mode=5; limit=1] readSnapTemporal
+# order: 2601977 size: 36233450 {} [21306.668 ms; mode=5; limit=1] transposeWithDegree
+# order: 2601977 size: 36233450 {} [85171.938 ms; mode=6; limit=1] readSnapTemporal
+# order: 2601977 size: 36233450 {} [17514.732 ms; mode=6; limit=1] transposeWithDegree
+# order: 2601977 size: 36233450 {} [85226.195 ms; mode=7; limit=1] readSnapTemporal
+# order: 2601977 size: 36233450 {} [17674.400 ms; mode=7; limit=1] transposeWithDegree
+# order: 2601977 size: 36233450 {} [321483.906 ms; mode=0; limit=2] readSnapTemporal
+# order: 2601977 size: 36233450 {} [30100.332 ms; mode=0; limit=2] transposeWithDegree
+# order: 2601977 size: 36233450 {} [321578.188 ms; mode=1; limit=2] readSnapTemporal
+# order: 2601977 size: 36233450 {} [30568.760 ms; mode=1; limit=2] transposeWithDegree
+# order: 2601977 size: 36233450 {} [82619.891 ms; mode=2; limit=2] readSnapTemporal
+# order: 2601977 size: 36233450 {} [15207.433 ms; mode=2; limit=2] transposeWithDegree
+# order: 2601977 size: 36233450 {} [82561.938 ms; mode=3; limit=2] readSnapTemporal
+# order: 2601977 size: 36233450 {} [15788.065 ms; mode=3; limit=2] transposeWithDegree
+# order: 2601977 size: 36233450 {} [93562.477 ms; mode=4; limit=2] readSnapTemporal
+# order: 2601977 size: 36233450 {} [18149.590 ms; mode=4; limit=2] transposeWithDegree
+# order: 2601977 size: 36233450 {} [93492.945 ms; mode=5; limit=2] readSnapTemporal
+# order: 2601977 size: 36233450 {} [18773.191 ms; mode=5; limit=2] transposeWithDegree
+# order: 2601977 size: 36233450 {} [81299.039 ms; mode=6; limit=2] readSnapTemporal
+# order: 2601977 size: 36233450 {} [16051.685 ms; mode=6; limit=2] transposeWithDegree
+# order: 2601977 size: 36233450 {} [80981.188 ms; mode=7; limit=2] readSnapTemporal
+# order: 2601977 size: 36233450 {} [16310.676 ms; mode=7; limit=2] transposeWithDegree
+# order: 2601977 size: 36233450 {} [261313.406 ms; mode=0; limit=3] readSnapTemporal
+# ...
 ```
 
-[![](https://i.imgur.com/AO60Lp2.gif)][sheets]
-[![](https://i.imgur.com/PfnYurJ.gif)][sheets]
-[![](https://i.imgur.com/yOU9KUs.gif)][sheets]
-[![](https://i.imgur.com/FOCek4N.gif)][sheets]
-[![](https://i.imgur.com/FNjzMwG.gif)][sheets]
-[![](https://i.imgur.com/yjf6gHQ.gif)][sheets]
-[![](https://i.imgur.com/0oJxvcN.gif)][sheets]
-[![](https://i.imgur.com/aCxMYZ5.gif)][sheets]
-[![](https://i.imgur.com/vTGHuYE.gif)][sheets]
-[![](https://i.imgur.com/Ka37H7J.gif)][sheets]
-[![](https://i.imgur.com/PMP8x2V.gif)][sheets]
-[![](https://i.imgur.com/xTkdVrU.gif)][sheets]
-[![](https://i.imgur.com/L9IsuTD.gif)][sheets]
-[![](https://i.imgur.com/sxNrmL2.gif)][sheets]
+[![](https://i.imgur.com/LdPSuul.gif)][sheets]
+[![](https://i.imgur.com/9DhELCr.gif)][sheets]
+[![](https://i.imgur.com/ySMFCGQ.gif)][sheets]
+[![](https://i.imgur.com/nImZDLh.gif)][sheets]
 
 <br>
 <br>
@@ -119,8 +100,10 @@ $ ./a.out ~/data/email-Eu-core-temporal.txt
 <br>
 <br>
 
-[![](https://i.imgur.com/DuJu78s.jpg)](https://www.youtube.com/watch?v=2k_ihEEZG-o)
+[![](https://i.imgur.com/56vNPa6.jpg)](https://www.youtube.com/watch?v=2k_ihEEZG-o)
 
+[Prof. Dip Sankar Banerjee]: https://sites.google.com/site/dipsankarban/
+[Prof. Kishore Kothapalli]: https://cstar.iiit.ac.in/~kkishore/
 [Stanford Large Network Dataset Collection]: http://snap.stanford.edu/data/index.html
-[charts]: https://photos.app.goo.gl/c2ivFPbEXdw6ZFaM7
-[sheets]: https://docs.google.com/spreadsheets/d/1AB23nO5K71-TWe7aY6cf5Rte7jfLhfITPFBnRB_jVzM/edit?usp=sharing
+[charts]: https://photos.app.goo.gl/xMW71rjRjXMBjKS98
+[sheets]: https://docs.google.com/spreadsheets/d/1MZaUpvJtsBIaNtqsGlQmfP1kSazTBgDfHi90CiBygJc/edit?usp=sharing
