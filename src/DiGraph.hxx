@@ -1,10 +1,12 @@
 #pragma once
+#include <utility>
 #include <vector>
 #include <ostream>
 #include <iostream>
 #include "_main.hxx"
 #include "Bitset.hxx"
 
+using std::pair;
 using std::vector;
 using std::ostream;
 using std::cout;
@@ -22,18 +24,18 @@ class DiGraph {
   using TEdge   = E;
 
   private:
-  Bitset<E>    none;
-  vector<bool> vex;
-  vector<V>    vdata;
-  vector<Bitset<E>> edata;
   int N = 0, M = 0;
-  bool unsortedFirst;
-  int  unsortedLimit;
+  vector<bool>      vex;
+  vector<V>         vdata;
+  vector<Bitset<E>> edata;
+  vector<pair<int, E>> temp;
+  Bitset<E>            none;
+  int mode, limit;
 
   public:
-  DiGraph(bool unsortedFirst, int unsortedLimit) :
-  none(Bitset<E>(unsortedFirst, unsortedLimit)), vex(), vdata(), edata(),
-  unsortedFirst(unsortedFirst), unsortedLimit(unsortedLimit) {}
+  DiGraph(int mode, int limit) :
+  N(), M(), vex(), vdata(), edata(), temp(),
+  none(Bitset<E>(0, 0, nullptr)), mode(mode), limit(limit) {}
 
   // Read operations
   public:
@@ -69,7 +71,7 @@ class DiGraph {
     if (u >= span()) {
       vex.resize(u+1);
       vdata.resize(u+1);
-      edata.resize(u+1, Bitset<E>(unsortedFirst, unsortedLimit));
+      edata.resize(u+1, Bitset<E>(mode, limit, &temp));
     }
     vex[u] = true;
     vdata[u] = d;

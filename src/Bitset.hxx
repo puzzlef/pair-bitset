@@ -2,13 +2,17 @@
 #include "_main.hxx"
 #include <utility>
 #include <vector>
+#include <iterator>
 #include <algorithm>
 
 using std::pair;
 using std::vector;
+using std::back_inserter;
 using std::lower_bound;
 using std::find_if;
 using std::merge;
+using std::inplace_merge;
+using std::copy;
 using std::min;
 
 
@@ -16,20 +20,26 @@ using std::min;
 
 template <class T=NONE>
 class Bitset {
-  int  sorted;
-  vector<pair<int, T>> data;
-  bool unsortedFirst;
-  int  unsortedLimit;
+  int sorted;
+  vector<pair<int, T>>  data;
+  vector<pair<int, T>> *temp;
+  int mode, limit;
 
   // Cute helpers
   private:
+  inline int  mergeMode()     const { return mode >> 1; }
+  inline bool unsortedFirst() const { return mode & 1; }
   inline int  unsorted() const { return data.size() - sorted; }
-  inline auto cbegin()  const { return data.begin(); }
-  inline auto cmiddle() const { return data.begin() + sorted; }
-  inline auto cend()    const { return data.end(); }
+
+  inline auto cbegin()   const { return data.begin(); }
+  inline auto cmiddle()  const { return data.begin() + sorted; }
+  inline auto cend()     const { return data.end(); }
   inline auto begin()  { return data.begin(); }
   inline auto middle() { return data.begin() + sorted; }
   inline auto end()    { return data.end(); }
+  inline auto rbegin()  { return data.rbegin(); }
+  inline auto rmiddle() { return data.rbegin() + unsorted(); }
+  inline auto rend()    { return data.rend(); }
 
   inline int lookupSorted(int id) const {
     auto fl = [](const auto& e, int id) { return e.first <  id; };
@@ -55,19 +65,48 @@ class Bitset {
   }
 
   inline int lookup(int id) const {
-    if (unsortedFirst) return lookupUnsortedFirst(id);
+    if (unsortedFirst()) return lookupUnsortedFirst(id);
     return lookupSortedFirst(id);
   }
 
-  inline void mergeUnsorted() {
+  inline void mergeWithSort() {
     auto fl = [](const auto& e, const auto& f) { return e.first < f.first; };
     sort(begin(), end(), fl);
-    sorted = data.size();
+  }
+
+  inline void mergeWithInplace() {
+    auto fl = [](const auto& e, const auto& f) { return e.first < f.first; };
+    sort(middle(), end(), fl);
+    inplace_merge(begin(), middle(), end(), fl);
+  }
+
+  inline void mergeWithSortedSpace() {
+    auto fl = [](const auto& e, const auto& f) { return e.first < f.first; };
+    sort(middle(), end(), fl);
+    (*temp).clear();
+    copy(cbegin(), cmiddle(), back_inserter((*temp)));
+    merge((*temp).begin(), (*temp).end(), middle(), end(), begin(), fl);
+  }
+
+  inline void mergeWithUnsortedSpace() {
+    auto fl = [](const auto& e, const auto& f) { return e.first < f.first; };
+    auto fg = [](const auto& e, const auto& f) { return e.first > f.first; };
+    sort(middle(), end(), fl);
+    (*temp).clear();
+    copy(cmiddle(), cend(), back_inserter((*temp)));
+    merge((*temp).rbegin(), (*temp).rend(), rmiddle(), rend(), rbegin(), fg);
   }
 
   inline void mergeAuto() {
-    if (unsorted() <= unsortedLimit) return;
-    mergeUnsorted();
+    if (unsorted() <= limit) return;
+    switch (mergeMode()) {
+      default:
+      case 0: mergeWithSort(); break;
+      case 1: mergeWithInplace(); break;
+      case 2: mergeWithSortedSpace(); break;
+      case 3: mergeWithUnsortedSpace(); break;
+    }
+    sorted = data.size();
   }
 
   inline void removeAtSorted(int i) {
@@ -82,7 +121,7 @@ class Bitset {
   }
 
   inline void removeAt(int i) {
-    int UB = data.size() - unsortedLimit;
+    int UB = data.size() - limit;
     if (i<UB) removeAtSorted(i);
     else removeAtUnsorted(i);
   }
@@ -126,6 +165,6 @@ class Bitset {
 
   // Lifetime operations
   public:
-  Bitset(bool unsortedFirst, int unsortedLimit) :
-  sorted(), data(), unsortedFirst(unsortedFirst), unsortedLimit(unsortedLimit) {}
+  Bitset(int mode, int limit, vector<pair<int, T>> *temp) :
+  sorted(), data(), temp(temp), mode(mode), limit(limit) {}
 };
