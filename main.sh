@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-src="bitset-sorted-vs-unsorted"
+src="bitset-sorted-full-vs-partial"
 out="/home/resources/Documents/subhajit/$src.log"
 ulimit -s unlimited
 printf "" > "$out"

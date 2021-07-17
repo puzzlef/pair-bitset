@@ -22,6 +22,7 @@ template <class T=NONE>
 class BitsetPartial {
   int sorted = 0;
   vector<pair<int, T>>  data;
+  const int LIMIT = 128;
 
   // Cute helpers
   private:
@@ -59,7 +60,7 @@ class BitsetPartial {
   }
 
   inline void mergeAuto() {
-    if (unsorted() <= limit) return;
+    if (unsorted() <= LIMIT) return;
     mergeWithInplace();
     sorted = data.size();
   }
@@ -76,7 +77,7 @@ class BitsetPartial {
   }
 
   inline void removeAt(int i) {
-    int UB = data.size() - limit;
+    int UB = data.size() - LIMIT;
     if (i<UB) removeAtSorted(i);
     else removeAtUnsorted(i);
   }
