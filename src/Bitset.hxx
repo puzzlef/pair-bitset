@@ -3,6 +3,7 @@
 #include <utility>
 #include <array>
 #include <vector>
+#include <iterator>
 #include <algorithm>
 
 using std::pair;
@@ -11,6 +12,7 @@ using std::vector;
 using std::iter_swap;
 using std::copy;
 using std::find_if;
+using std::back_inserter;
 
 
 
@@ -20,11 +22,10 @@ class Bitset {
   // Member types.
   public:
   using entry = pair<int, T>;
-  using iterator = vector<entry>::iterator;
 
   // Data.
   protected:
-  size_t N;
+  size_t N = 0;
   vector<entry> large;
   array<entry, C> small;
 
@@ -32,12 +33,12 @@ class Bitset {
   // Cute helpers.
   private:
   inline bool isSmall() const { return large.size() == 0; }
-  inline       iterator begin()       { return isSmall()? small.begin() : large.begin(); }
-  inline const iterator begin() const { return isSmall()? small.begin() : large.begin(); }
-  inline       iterator end()       { return isSmall()? small.begin()+N : large.end(); }
-  inline const iterator end() const { return isSmall()? small.begin()+N : large.end(); }
-  inline       auto iterable()       { return makeIter(begin(), end()); }
-  inline const auto iterable() const { return makeIter(begin(), end()); }
+  inline       auto begin()       { return isSmall()? small.data() : large.data(); }
+  inline const auto begin() const { return isSmall()? small.data() : large.data(); }
+  inline       auto end()       { return isSmall()? small.data()+N : large.data()+N; }
+  inline const auto end() const { return isSmall()? small.data()+N : large.data()+N; }
+  inline       auto iterable()       { return pointerIter(begin(), end()); }
+  inline const auto iterable() const { return pointerIter(begin(), end()); }
 
   inline auto lookup(int id) const {
     auto fe = [&](const auto& e) { return e.first == id; };
@@ -45,9 +46,8 @@ class Bitset {
   }
 
   inline void pushBackExpand(const entry& e) {
-    large.resize(N+1);
-    copy(small.begin(), small.end(), large.begin());
-    large[N++] = e;
+    copy(small.begin(), small.end(), back_inserter(large));
+    large.push_back(e); N++;
   }
 
   inline void pushBack(const entry& e) {

@@ -12,8 +12,8 @@ using std::cout;
 
 
 
-// DI-GRAPH UNSORTED
-// -----------------
+// DI-GRAPH
+// --------
 
 template <class V=NONE, class E=NONE, size_t C=128>
 class DiGraph {
@@ -38,10 +38,10 @@ class DiGraph {
   bool hasEdge(int u, int v) const { return u < span() && edata[u].has(v); }
   auto edges(int u)          const { return u < span()? edata[u].keys() : none.keys(); }
   int degree(int u)          const { return u < span()? edata[u].size() : 0; }
-  auto vertices()      const { return filter(range(span()), [&](int u) { return  vex[u]; }); }
-  auto nonVertices()   const { return filter(range(span()), [&](int u) { return !vex[u]; }); }
-  auto inEdges(int v)  const { return filter(range(span()), [&](int u) { return edata[u].has(v); }); }
-  int inDegree(int v) const { return countIf(range(span()), [&](int u) { return edata[u].has(v); }); }
+  auto vertices()      const { return filterIter(rangeIter(span()), [&](int u) { return  vex[u]; }); }
+  auto nonVertices()   const { return filterIter(rangeIter(span()), [&](int u) { return !vex[u]; }); }
+  auto inEdges(int v)  const { return filterIter(rangeIter(span()), [&](int u) { return edata[u].has(v); }); }
+  int inDegree(int v) const { return countIf(rangeIter(span()), [&](int u) { return edata[u].has(v); }); }
 
   V vertexData(int u)   const { return hasVertex(u)? vdata[u] : V(); }
   void setVertexData(int u, V d) { if (hasVertex(u)) vdata[u] = d; }
@@ -50,6 +50,13 @@ class DiGraph {
 
   // Write operations
   public:
+  void clear() {
+    vex.clear();
+    vdata.clear();
+    edata.clear();
+    N = 0; M = 0;
+  }
+
   void addVertex(int u, V d=V()) {
     if (hasVertex(u)) return;
     if (u >= span()) {
@@ -103,8 +110,8 @@ class DiGraph {
 // DI-GRAPH PRINT
 // --------------
 
-template <class V, class E>
-void write(ostream& a, const DiGraph<V, E>& x, bool all=false) {
+template <class V, class E, size_t C>
+void write(ostream& a, const DiGraph<V, E, C>& x, bool all=false) {
   a << "order: " << x.order() << " size: " << x.size();
   if (!all) { a << " {}"; return; }
   a << " {\n";
@@ -117,8 +124,8 @@ void write(ostream& a, const DiGraph<V, E>& x, bool all=false) {
   a << "}";
 }
 
-template <class V, class E>
-ostream& operator<<(ostream& a, const DiGraph<V, E>& x) {
+template <class V, class E, size_t C>
+ostream& operator<<(ostream& a, const DiGraph<V, E, C>& x) {
   write(a, x);
   return a;
 }

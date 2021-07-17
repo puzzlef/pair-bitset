@@ -267,6 +267,129 @@ auto sliceIter(const J& x, int i, int I) {
 
 
 
+// POINTER
+// -------
+
+template <class T>
+class PointerIterator {
+  using iterator = PointerIterator;
+  T *it;
+
+  public:
+  ITERATOR_USING(random_access_iterator_tag, ptrdiff_t, T, T&, T*)
+  PointerIterator(T *it) : it(it) {}
+  ITERATOR_DEREF(iterator, i, *it, it[i])
+  ITERATOR_PTR(iterator, &it)
+  ITERATOR_NEXT(iterator, ++it, --it)
+  ITERATOR_ADVANCE(iterator, i, it += i, it -= i)
+  ITERATOR_ARITHMETICP(iterator, a, n, iterator(a.it+n))
+  ITERATOR_ARITHMETICN(iterator, a, n, iterator(a.it-n))
+  ITERATOR_COMPARISION(iterator, a, b, a.it, b.it)
+};
+
+template <class T>
+class ConstPointerIterator {
+  using iterator = ConstPointerIterator;
+  const T* it;
+
+  public:
+  ITERATOR_USING(random_access_iterator_tag, ptrdiff_t, T, const T&, const T*)
+  ConstPointerIterator(const T* it) : it(it) {}
+  ITERATOR_DEREF(iterator, i, *it, it[i])
+  ITERATOR_PTR(iterator, &it)
+  ITERATOR_NEXT(iterator, ++it, --it)
+  ITERATOR_ADVANCE(iterator, i, it += i, it -= i)
+  ITERATOR_ARITHMETICP(iterator, a, n, iterator(a.it+n))
+  ITERATOR_ARITHMETICN(iterator, a, n, iterator(a.it-n))
+  ITERATOR_COMPARISION(iterator, a, b, a.it, b.it)
+};
+
+
+template <class T>
+auto pointerIterator(T* it) {
+  return PointerIterator<T>(it);
+}
+
+template <class T>
+auto pointerIterator(const T* it) {
+  return ConstPointerIterator<T>(it);
+}
+
+template <class T>
+auto cpointerIterator(const T* it) {
+  return ConstPointerIterator<T>(it);
+}
+
+
+template <class T>
+auto pointerIter(T* ib, T* ie) {
+  auto b = PointerIterator<T>(ib);
+  auto e = PointerIterator<T>(ie);
+  return makeIter(b, e);
+}
+
+template <class T>
+auto pointerIter(const T* ib, const T* ie) {
+  auto b = ConstPointerIterator<T>(ib);
+  auto e = ConstPointerIterator<T>(ie);
+  return makeIter(b, e);
+}
+
+template <class T>
+auto cpointerIter(const T* ib, const T* ie) {
+  auto b = ConstPointerIterator<T>(ib);
+  auto e = ConstPointerIterator<T>(ie);
+  return makeIter(b, e);
+}
+
+template <class J>
+auto pointerIter(J& x, int i, int I) {
+  return pointerIter(x.data()+i, x.data()+I);
+}
+
+template <class J>
+auto pointerIter(J& x, int N) {
+  return pointerIter(x.data(), x.data()+N);
+}
+
+template <class J>
+auto pointerIter(J& x) {
+  return pointerIter(x.data(), x.data()+x.size());
+}
+
+template <class J>
+auto pointerIter(const J& x, int i, int I) {
+  return pointerIter(x.data()+i, x.data()+I);
+}
+
+template <class J>
+auto pointerIter(const J& x, int N) {
+  return pointerIter(x.data(), x.data()+N);
+}
+
+template <class J>
+auto pointerIter(const J& x) {
+  return pointerIter(x.data(), x.data()+x.size());
+}
+
+template <class J>
+auto cpointerIter(const J& x, int i, int I) {
+  return cpointerIter(x.data()+i, x.data()+I);
+}
+
+template <class J>
+auto cpointerIter(const J& x, int N) {
+  return cpointerIter(x.data(), x.data()+N);
+}
+
+template <class J>
+auto cpointerIter(const J& x) {
+  return cpointerIter(x.data(), x.data()+x.size());
+}
+
+
+
+
 // TRANSFORM
 // ---------
 
