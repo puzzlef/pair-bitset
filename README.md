@@ -5,19 +5,19 @@ This experiment was for comparing performance between:
 2. Read graph edges to **unsorted bitset** based DiGraph & transpose.
 
 Each approach was attempted on a number of temporal graphs, running each with
-multiple batch sizes (`1`, `5`, `10`, `50`, ...). Each batch size was run with 5
-different updates to graph, and each specific update was run 5 times for each
-approach to get a good time measure. **Transpose** of DiGraph based on
-**sorted bitset** is clearly **faster** than the *unsorted* one. However, with
-**reading graph edges** there is no clear winner (sometimes *sorted* is
-*faster* especially for large graphs, and sometimes *unsorted*). Maybe when
-new edges have many duplicates, **inserts are less**, and hence sorted version
-is faster (since sorted bitset has slow insert time).
+multiple batch sizes (`1`, `5`, `10`, `50`, ...). Each batch size was run 5
+times for each approach to get a good time measure. **Transpose** of DiGraph
+based on **sorted bitset** is clearly **faster** than the *unsorted* one.
+However, with **reading graph edges** there is no clear winner (sometimes
+*sorted* is *faster* especially for large graphs, and sometimes *unsorted*).
+Maybe when new edges have many duplicates, **inserts are less**, and hence
+sorted version is faster (since sorted bitset has slow insert time).
 
 All outputs are saved in [out](out/) and a small part of the output is listed
 here. Some [charts] are also included below, generated from [sheets]. The input
 data used for this experiment is available at the
-[Stanford Large Network Dataset Collection].
+[Stanford Large Network Dataset Collection]. This experiment was done with
+guidance from [Prof. Dip Sankar Banerjee] and [Prof. Kishore Kothapalli].
 
 <br>
 
@@ -121,6 +121,8 @@ $ ./a.out ~/data/email-Eu-core-temporal.txt
 
 [![](https://i.imgur.com/DuJu78s.jpg)](https://www.youtube.com/watch?v=2k_ihEEZG-o)
 
+[Prof. Dip Sankar Banerjee]: https://sites.google.com/site/dipsankarban/
+[Prof. Kishore Kothapalli]: https://cstar.iiit.ac.in/~kkishore/
 [Stanford Large Network Dataset Collection]: http://snap.stanford.edu/data/index.html
 [charts]: https://photos.app.goo.gl/c2ivFPbEXdw6ZFaM7
 [sheets]: https://docs.google.com/spreadsheets/d/1AB23nO5K71-TWe7aY6cf5Rte7jfLhfITPFBnRB_jVzM/edit?usp=sharing
