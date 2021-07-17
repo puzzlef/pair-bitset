@@ -1,5 +1,5 @@
 #pragma once
-#include "DiGraphUnsorted.hxx"
+#include "DiGraphFull.hxx"
 
 
 
@@ -37,11 +37,4 @@ void transposeWithDegree(H& a, const G& x) {
     for (int v : x.edges(u))
       a.addEdge(v, u, x.edgeData(u, v));
   }
-}
-
-template <class G>
-auto transposeWithDegree(const G& x) {
-  using E = typename G::TEdge;
-  DiGraphUnsorted<int, E> a; transposeWithDegree(a, x);
-  return a;
 }
