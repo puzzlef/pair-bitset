@@ -1,0 +1,200 @@
+Using graph /home/subhajit/data/email-Eu-core-temporal.txt ...
+Temporal edges: 332335
+order: 986 size: 24929 {} [00252.052 ms; buffer=1] readSnapTemporal
+order: 986 size: 24929 {} [00001.806 ms; buffer=1] transposeWithDegree
+order: 986 size: 24929 {} [00252.908 ms; buffer=2] readSnapTemporal
+order: 986 size: 24929 {} [00001.744 ms; buffer=2] transposeWithDegree
+order: 986 size: 24929 {} [00256.706 ms; buffer=4] readSnapTemporal
+order: 986 size: 24929 {} [00001.754 ms; buffer=4] transposeWithDegree
+order: 986 size: 24929 {} [00251.471 ms; buffer=8] readSnapTemporal
+order: 986 size: 24929 {} [00001.737 ms; buffer=8] transposeWithDegree
+order: 986 size: 24929 {} [00252.723 ms; buffer=16] readSnapTemporal
+order: 986 size: 24929 {} [00001.786 ms; buffer=16] transposeWithDegree
+order: 986 size: 24929 {} [00256.125 ms; buffer=32] readSnapTemporal
+order: 986 size: 24929 {} [00001.784 ms; buffer=32] transposeWithDegree
+order: 986 size: 24929 {} [00251.856 ms; buffer=64] readSnapTemporal
+order: 986 size: 24929 {} [00001.670 ms; buffer=64] transposeWithDegree
+order: 986 size: 24929 {} [00252.906 ms; buffer=128] readSnapTemporal
+order: 986 size: 24929 {} [00001.715 ms; buffer=128] transposeWithDegree
+order: 986 size: 24929 {} [00252.658 ms; buffer=256] readSnapTemporal
+order: 986 size: 24929 {} [00001.780 ms; buffer=256] transposeWithDegree
+order: 986 size: 24929 {} [00254.143 ms; buffer=512] readSnapTemporal
+order: 986 size: 24929 {} [00002.484 ms; buffer=512] transposeWithDegree
+order: 986 size: 24929 {} [00255.880 ms; buffer=1024] readSnapTemporal
+order: 986 size: 24929 {} [00003.449 ms; buffer=1024] transposeWithDegree
+order: 986 size: 24929 {} [00256.751 ms; buffer=2048] readSnapTemporal
+order: 986 size: 24929 {} [00006.596 ms; buffer=2048] transposeWithDegree
+order: 986 size: 24929 {} [00258.555 ms; buffer=4096] readSnapTemporal
+order: 986 size: 24929 {} [00011.939 ms; buffer=4096] transposeWithDegree
+
+Using graph /home/subhajit/data/CollegeMsg.txt ...
+Temporal edges: 59836
+order: 1899 size: 20296 {} [00053.125 ms; buffer=1] readSnapTemporal
+order: 1899 size: 20296 {} [00001.475 ms; buffer=1] transposeWithDegree
+order: 1899 size: 20296 {} [00053.370 ms; buffer=2] readSnapTemporal
+order: 1899 size: 20296 {} [00001.348 ms; buffer=2] transposeWithDegree
+order: 1899 size: 20296 {} [00048.492 ms; buffer=4] readSnapTemporal
+order: 1899 size: 20296 {} [00001.336 ms; buffer=4] transposeWithDegree
+order: 1899 size: 20296 {} [00048.338 ms; buffer=8] readSnapTemporal
+order: 1899 size: 20296 {} [00001.324 ms; buffer=8] transposeWithDegree
+order: 1899 size: 20296 {} [00048.360 ms; buffer=16] readSnapTemporal
+order: 1899 size: 20296 {} [00001.344 ms; buffer=16] transposeWithDegree
+order: 1899 size: 20296 {} [00048.746 ms; buffer=32] readSnapTemporal
+order: 1899 size: 20296 {} [00001.344 ms; buffer=32] transposeWithDegree
+order: 1899 size: 20296 {} [00048.622 ms; buffer=64] readSnapTemporal
+order: 1899 size: 20296 {} [00001.431 ms; buffer=64] transposeWithDegree
+order: 1899 size: 20296 {} [00049.250 ms; buffer=128] readSnapTemporal
+order: 1899 size: 20296 {} [00001.739 ms; buffer=128] transposeWithDegree
+order: 1899 size: 20296 {} [00049.361 ms; buffer=256] readSnapTemporal
+order: 1899 size: 20296 {} [00002.394 ms; buffer=256] transposeWithDegree
+order: 1899 size: 20296 {} [00050.734 ms; buffer=512] readSnapTemporal
+order: 1899 size: 20296 {} [00003.838 ms; buffer=512] transposeWithDegree
+order: 1899 size: 20296 {} [00053.358 ms; buffer=1024] readSnapTemporal
+order: 1899 size: 20296 {} [00006.857 ms; buffer=1024] transposeWithDegree
+order: 1899 size: 20296 {} [00059.181 ms; buffer=2048] readSnapTemporal
+order: 1899 size: 20296 {} [00012.723 ms; buffer=2048] transposeWithDegree
+order: 1899 size: 20296 {} [00072.606 ms; buffer=4096] readSnapTemporal
+order: 1899 size: 20296 {} [00021.804 ms; buffer=4096] transposeWithDegree
+
+Using graph /home/subhajit/data/sx-mathoverflow.txt ...
+Temporal edges: 506551
+order: 24818 size: 239978 {} [00467.282 ms; buffer=1] readSnapTemporal
+order: 24818 size: 239978 {} [00027.798 ms; buffer=1] transposeWithDegree
+order: 24818 size: 239978 {} [00462.547 ms; buffer=2] readSnapTemporal
+order: 24818 size: 239978 {} [00027.125 ms; buffer=2] transposeWithDegree
+order: 24818 size: 239978 {} [00460.762 ms; buffer=4] readSnapTemporal
+order: 24818 size: 239978 {} [00027.794 ms; buffer=4] transposeWithDegree
+order: 24818 size: 239978 {} [00460.665 ms; buffer=8] readSnapTemporal
+order: 24818 size: 239978 {} [00027.064 ms; buffer=8] transposeWithDegree
+order: 24818 size: 239978 {} [00460.111 ms; buffer=16] readSnapTemporal
+order: 24818 size: 239978 {} [00033.076 ms; buffer=16] transposeWithDegree
+order: 24818 size: 239978 {} [00473.263 ms; buffer=32] readSnapTemporal
+order: 24818 size: 239978 {} [00039.103 ms; buffer=32] transposeWithDegree
+order: 24818 size: 239978 {} [00480.679 ms; buffer=64] readSnapTemporal
+order: 24818 size: 239978 {} [00048.718 ms; buffer=64] transposeWithDegree
+order: 24818 size: 239978 {} [00509.206 ms; buffer=128] readSnapTemporal
+order: 24818 size: 239978 {} [00083.734 ms; buffer=128] transposeWithDegree
+order: 24818 size: 239978 {} [00561.776 ms; buffer=256] readSnapTemporal
+order: 24818 size: 239978 {} [00126.747 ms; buffer=256] transposeWithDegree
+order: 24818 size: 239978 {} [00650.338 ms; buffer=512] readSnapTemporal
+order: 24818 size: 239978 {} [00211.303 ms; buffer=512] transposeWithDegree
+order: 24818 size: 239978 {} [00779.894 ms; buffer=1024] readSnapTemporal
+order: 24818 size: 239978 {} [00334.143 ms; buffer=1024] transposeWithDegree
+order: 24818 size: 239978 {} [01122.449 ms; buffer=2048] readSnapTemporal
+order: 24818 size: 239978 {} [00628.386 ms; buffer=2048] transposeWithDegree
+order: 24818 size: 239978 {} [01685.384 ms; buffer=4096] readSnapTemporal
+order: 24818 size: 239978 {} [01203.733 ms; buffer=4096] transposeWithDegree
+
+Using graph /home/subhajit/data/sx-askubuntu.txt ...
+Temporal edges: 964438
+order: 159316 size: 596933 {} [00978.236 ms; buffer=1] readSnapTemporal
+order: 159316 size: 596933 {} [00099.121 ms; buffer=1] transposeWithDegree
+order: 159316 size: 596933 {} [00964.484 ms; buffer=2] readSnapTemporal
+order: 159316 size: 596933 {} [00094.972 ms; buffer=2] transposeWithDegree
+order: 159316 size: 596933 {} [00965.986 ms; buffer=4] readSnapTemporal
+order: 159316 size: 596933 {} [00092.212 ms; buffer=4] transposeWithDegree
+order: 159316 size: 596933 {} [00973.550 ms; buffer=8] readSnapTemporal
+order: 159316 size: 596933 {} [00107.385 ms; buffer=8] transposeWithDegree
+order: 159316 size: 596933 {} [00985.030 ms; buffer=16] readSnapTemporal
+order: 159316 size: 596933 {} [00128.510 ms; buffer=16] transposeWithDegree
+order: 159316 size: 596933 {} [01013.953 ms; buffer=32] readSnapTemporal
+order: 159316 size: 596933 {} [00165.754 ms; buffer=32] transposeWithDegree
+order: 159316 size: 596933 {} [01087.721 ms; buffer=64] readSnapTemporal
+order: 159316 size: 596933 {} [00245.616 ms; buffer=64] transposeWithDegree
+order: 159316 size: 596933 {} [01189.213 ms; buffer=128] readSnapTemporal
+order: 159316 size: 596933 {} [00409.935 ms; buffer=128] transposeWithDegree
+order: 159316 size: 596933 {} [01447.982 ms; buffer=256] readSnapTemporal
+order: 159316 size: 596933 {} [00675.442 ms; buffer=256] transposeWithDegree
+order: 159316 size: 596933 {} [01873.472 ms; buffer=512] readSnapTemporal
+order: 159316 size: 596933 {} [01181.347 ms; buffer=512] transposeWithDegree
+order: 159316 size: 596933 {} [02418.500 ms; buffer=1024] readSnapTemporal
+order: 159316 size: 596933 {} [01928.527 ms; buffer=1024] transposeWithDegree
+order: 159316 size: 596933 {} [04067.039 ms; buffer=2048] readSnapTemporal
+order: 159316 size: 596933 {} [04193.183 ms; buffer=2048] transposeWithDegree
+order: 159316 size: 596933 {} [07595.580 ms; buffer=4096] readSnapTemporal
+order: 159316 size: 596933 {} [08351.631 ms; buffer=4096] transposeWithDegree
+
+Using graph /home/subhajit/data/sx-superuser.txt ...
+Temporal edges: 1443340
+order: 194085 size: 924886 {} [01624.395 ms; buffer=1] readSnapTemporal
+order: 194085 size: 924886 {} [00166.152 ms; buffer=1] transposeWithDegree
+order: 194085 size: 924886 {} [01603.708 ms; buffer=2] readSnapTemporal
+order: 194085 size: 924886 {} [00157.249 ms; buffer=2] transposeWithDegree
+order: 194085 size: 924886 {} [01597.837 ms; buffer=4] readSnapTemporal
+order: 194085 size: 924886 {} [00156.502 ms; buffer=4] transposeWithDegree
+order: 194085 size: 924886 {} [01604.164 ms; buffer=8] readSnapTemporal
+order: 194085 size: 924886 {} [00171.164 ms; buffer=8] transposeWithDegree
+order: 194085 size: 924886 {} [01633.606 ms; buffer=16] readSnapTemporal
+order: 194085 size: 924886 {} [00202.688 ms; buffer=16] transposeWithDegree
+order: 194085 size: 924886 {} [01658.625 ms; buffer=32] readSnapTemporal
+order: 194085 size: 924886 {} [00255.784 ms; buffer=32] transposeWithDegree
+order: 194085 size: 924886 {} [01753.927 ms; buffer=64] readSnapTemporal
+order: 194085 size: 924886 {} [00356.802 ms; buffer=64] transposeWithDegree
+order: 194085 size: 924886 {} [01892.331 ms; buffer=128] readSnapTemporal
+order: 194085 size: 924886 {} [00546.013 ms; buffer=128] transposeWithDegree
+order: 194085 size: 924886 {} [02243.498 ms; buffer=256] readSnapTemporal
+order: 194085 size: 924886 {} [00908.109 ms; buffer=256] transposeWithDegree
+order: 194085 size: 924886 {} [02786.939 ms; buffer=512] readSnapTemporal
+order: 194085 size: 924886 {} [01562.186 ms; buffer=512] transposeWithDegree
+order: 194085 size: 924886 {} [03612.540 ms; buffer=1024] readSnapTemporal
+order: 194085 size: 924886 {} [02508.000 ms; buffer=1024] transposeWithDegree
+order: 194085 size: 924886 {} [05515.718 ms; buffer=2048] readSnapTemporal
+order: 194085 size: 924886 {} [05586.599 ms; buffer=2048] transposeWithDegree
+order: 194085 size: 924886 {} [10055.698 ms; buffer=4096] readSnapTemporal
+order: 194085 size: 924886 {} [10195.560 ms; buffer=4096] transposeWithDegree
+
+Using graph /home/subhajit/data/wiki-talk-temporal.txt ...
+Temporal edges: 7833141
+order: 1140149 size: 3309592 {} [21034.535 ms; buffer=1] readSnapTemporal
+order: 1140149 size: 3309592 {} [00506.117 ms; buffer=1] transposeWithDegree
+order: 1140149 size: 3309592 {} [20951.172 ms; buffer=2] readSnapTemporal
+order: 1140149 size: 3309592 {} [00463.744 ms; buffer=2] transposeWithDegree
+order: 1140149 size: 3309592 {} [20872.012 ms; buffer=4] readSnapTemporal
+order: 1140149 size: 3309592 {} [00441.024 ms; buffer=4] transposeWithDegree
+order: 1140149 size: 3309592 {} [20885.201 ms; buffer=8] readSnapTemporal
+order: 1140149 size: 3309592 {} [00445.470 ms; buffer=8] transposeWithDegree
+order: 1140149 size: 3309592 {} [20918.934 ms; buffer=16] readSnapTemporal
+order: 1140149 size: 3309592 {} [00496.978 ms; buffer=16] transposeWithDegree
+order: 1140149 size: 3309592 {} [20962.551 ms; buffer=32] readSnapTemporal
+order: 1140149 size: 3309592 {} [00589.249 ms; buffer=32] transposeWithDegree
+order: 1140149 size: 3309592 {} [21134.973 ms; buffer=64] readSnapTemporal
+order: 1140149 size: 3309592 {} [00733.433 ms; buffer=64] transposeWithDegree
+order: 1140149 size: 3309592 {} [21382.244 ms; buffer=128] readSnapTemporal
+order: 1140149 size: 3309592 {} [00952.785 ms; buffer=128] transposeWithDegree
+order: 1140149 size: 3309592 {} [21775.459 ms; buffer=256] readSnapTemporal
+order: 1140149 size: 3309592 {} [01626.138 ms; buffer=256] transposeWithDegree
+order: 1140149 size: 3309592 {} [22888.002 ms; buffer=512] readSnapTemporal
+order: 1140149 size: 3309592 {} [02791.479 ms; buffer=512] transposeWithDegree
+order: 1140149 size: 3309592 {} [24671.443 ms; buffer=1024] readSnapTemporal
+order: 1140149 size: 3309592 {} [04544.700 ms; buffer=1024] transposeWithDegree
+order: 1140149 size: 3309592 {} [29663.932 ms; buffer=2048] readSnapTemporal
+order: 1140149 size: 3309592 {} [10301.691 ms; buffer=2048] transposeWithDegree
+order: 1140149 size: 3309592 {} [40195.387 ms; buffer=4096] readSnapTemporal
+terminate called after throwing an instance of 'std::bad_alloc'
+  what():  std::bad_alloc
+Using graph /home/subhajit/data/sx-stackoverflow.txt ...
+Temporal edges: 63497051
+order: 2601977 size: 36233450 {} [92162.930 ms; buffer=1] readSnapTemporal
+order: 2601977 size: 36233450 {} [14232.156 ms; buffer=1] transposeWithDegree
+order: 2601977 size: 36233450 {} [92023.273 ms; buffer=2] readSnapTemporal
+order: 2601977 size: 36233450 {} [13923.403 ms; buffer=2] transposeWithDegree
+order: 2601977 size: 36233450 {} [91467.188 ms; buffer=4] readSnapTemporal
+order: 2601977 size: 36233450 {} [13847.361 ms; buffer=4] transposeWithDegree
+order: 2601977 size: 36233450 {} [91495.625 ms; buffer=8] readSnapTemporal
+order: 2601977 size: 36233450 {} [13677.591 ms; buffer=8] transposeWithDegree
+order: 2601977 size: 36233450 {} [90916.078 ms; buffer=16] readSnapTemporal
+order: 2601977 size: 36233450 {} [13705.362 ms; buffer=16] transposeWithDegree
+order: 2601977 size: 36233450 {} [91622.992 ms; buffer=32] readSnapTemporal
+order: 2601977 size: 36233450 {} [14023.922 ms; buffer=32] transposeWithDegree
+order: 2601977 size: 36233450 {} [97664.609 ms; buffer=64] readSnapTemporal
+order: 2601977 size: 36233450 {} [17388.348 ms; buffer=64] transposeWithDegree
+order: 2601977 size: 36233450 {} [104383.391 ms; buffer=128] readSnapTemporal
+order: 2601977 size: 36233450 {} [18472.646 ms; buffer=128] transposeWithDegree
+order: 2601977 size: 36233450 {} [99858.531 ms; buffer=256] readSnapTemporal
+order: 2601977 size: 36233450 {} [21877.215 ms; buffer=256] transposeWithDegree
+order: 2601977 size: 36233450 {} [105886.547 ms; buffer=512] readSnapTemporal
+order: 2601977 size: 36233450 {} [34482.242 ms; buffer=512] transposeWithDegree
+order: 2601977 size: 36233450 {} [124985.078 ms; buffer=1024] readSnapTemporal
+order: 2601977 size: 36233450 {} [45205.969 ms; buffer=1024] transposeWithDegree
+terminate called after throwing an instance of 'std::bad_alloc'
+  what():  std::bad_alloc
