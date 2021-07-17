@@ -15,7 +15,8 @@ performs **slightly better** than sorted approach.
 All outputs are saved in [out](out/) and a small part of the output is listed
 here. Some [charts] are also included below, generated from [sheets]. The input
 data used for this experiment is available at the
-[Stanford Large Network Dataset Collection].
+[Stanford Large Network Dataset Collection]. This experiment was done with
+guidance from [Prof. Dip Sankar Banerjee] and [Prof. Kishore Kothapalli].
 
 <br>
 
@@ -90,6 +91,8 @@ $ ...
 
 [![](https://i.imgur.com/WUYb26N.jpg)](https://www.youtube.com/watch?v=281ASMaXDQw)
 
+[Prof. Dip Sankar Banerjee]: https://sites.google.com/site/dipsankarban/
+[Prof. Kishore Kothapalli]: https://cstar.iiit.ac.in/~kkishore/
 [Stanford Large Network Dataset Collection]: http://snap.stanford.edu/data/index.html
 [Roaring bitmap]: https://github.com/RoaringBitmap
 [charts]: https://photos.app.goo.gl/Hv7WoJ9DK91r4yC17
