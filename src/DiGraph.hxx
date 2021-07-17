@@ -3,7 +3,7 @@
 #include <ostream>
 #include <iostream>
 #include "_main.hxx"
-#include "BitSetSorted.hxx"
+#include "Bitset.hxx"
 
 using std::vector;
 using std::ostream;
@@ -15,20 +15,17 @@ using std::cout;
 // DI-GRAPH UNSORTED
 // -----------------
 
-template <class V=NONE, class E=NONE>
-class DiGraphSorted {
-  template <class T>
-  using BitSet = BitSetSorted<T>;
-
+template <class V=NONE, class E=NONE, size_t C=128>
+class DiGraph {
   public:
   using TVertex = V;
   using TEdge   = E;
 
   private:
-  BitSet<E>    none;
+  Bitset<E, C> none;
   vector<bool> vex;
   vector<V>    vdata;
-  vector<BitSet<E>> edata;
+  vector<Bitset<E, C>> edata;
   int N = 0, M = 0;
 
   // Read operations
@@ -107,7 +104,7 @@ class DiGraphSorted {
 // --------------
 
 template <class V, class E>
-void write(ostream& a, const DiGraphSorted<V, E>& x, bool all=false) {
+void write(ostream& a, const DiGraph<V, E>& x, bool all=false) {
   a << "order: " << x.order() << " size: " << x.size();
   if (!all) { a << " {}"; return; }
   a << " {\n";
@@ -121,7 +118,7 @@ void write(ostream& a, const DiGraphSorted<V, E>& x, bool all=false) {
 }
 
 template <class V, class E>
-ostream& operator<<(ostream& a, const DiGraphSorted<V, E>& x) {
+ostream& operator<<(ostream& a, const DiGraph<V, E>& x) {
   write(a, x);
   return a;
 }
