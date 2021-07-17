@@ -1,112 +1,62 @@
-Testing the effectiveness of **sorted** vs **unsorted** list of integers for BitSet.
+Comparing various **buffer sizes** for BitSet with **small vector optimization**.
 
-This experiment was for comparing performance between:
-1. Read graph edges to **sorted bitset** based DiGraph & transpose.
-2. Read graph edges to **unsorted bitset** based DiGraph & transpose.
-
-Each approach was attempted on a number of temporal graphs, running each with
-multiple batch sizes (`1`, `5`, `10`, `50`, ...). Each batch size was run with 5
-different updates to graph, and each specific update was run 5 times for each
-approach to get a good time measure. **Transpose** of DiGraph based on
-**sorted bitset** is clearly **faster** than the *unsorted* one. However, with
-**reading graph edges** there is no clear winner (sometimes *sorted* is
-*faster* especially for large graphs, and sometimes *unsorted*). Maybe when
-new edges have many duplicates, **inserts are less**, and hence sorted version
-is faster (since sorted bitset has slow insert time).
+**Read graph edges**, and **transpose**,  was attempted on a number of temporal
+graphs, running each with multiple buffer sizes (`1`, `2`, `4`, ...`4096`).
+Each buffer size was run 5 times for for both **read** and **transpose** to get
+a good time measure. On average, a **buffer size** of `4` seems to give **small**
+**improvement**. Any further increase in buffer size slows down performance.
+This is possibly because of unnecessaryily large contiguous large memory allocation
+needed by the buffer, and low cache-hit percent due to widely separated edge data
+(due to the static buffer). In fact it even crashes when 26 instances of graphs
+with varying buffer sizes can't all be held in memory. Hence, **small vector**
+**optimization** is **not useful**, atleast when used for graphs.
 
 All outputs are saved in [out](out/) and a small part of the output is listed
 here. Some [charts] are also included below, generated from [sheets]. The input
 data used for this experiment is available at the
-[Stanford Large Network Dataset Collection].
+[Stanford Large Network Dataset Collection]. This experiment was done with
+guidance from [Prof. Dip Sankar Banerjee] and [Prof. Kishore Kothapalli].
 
 <br>
 
 ```bash
 $ g++ -O3 main.cxx
 $ ./a.out ~/data/email-Eu-core-temporal.txt
+$ ./a.out ~/data/CollegeMsg.txt
+$ ...
 
-# (SHORTENED)
 # ...
 #
-# Using graph sx-stackoverflow ...
+# Using graph /home/subhajit/data/sx-stackoverflow.txt ...
 # Temporal edges: 63497051
-# order: 2601977 size: 36233450 {}
-#
-# # Batch size 1e+3
-# [00003.650 ms] readSnapTemporal [sorted]
-# [00002.289 ms] readSnapTemporal [unsorted]
-# [05808.473 ms] transposeWithDegree [sorted]
-# [16766.326 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+3
-# [00009.728 ms] readSnapTemporal [sorted]
-# [00010.450 ms] readSnapTemporal [unsorted]
-# [05893.706 ms] transposeWithDegree [sorted]
-# [16913.642 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+4
-# [00019.183 ms] readSnapTemporal [sorted]
-# [00018.723 ms] readSnapTemporal [unsorted]
-# [05894.552 ms] transposeWithDegree [sorted]
-# [16950.788 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+4
-# [00075.656 ms] readSnapTemporal [sorted]
-# [00080.469 ms] readSnapTemporal [unsorted]
-# [05909.356 ms] transposeWithDegree [sorted]
-# [16974.218 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+5
-# [00137.122 ms] readSnapTemporal [sorted]
-# [00156.376 ms] readSnapTemporal [unsorted]
-# [05853.389 ms] transposeWithDegree [sorted]
-# [16997.236 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+5
-# [00655.838 ms] readSnapTemporal [sorted]
-# [00779.563 ms] readSnapTemporal [unsorted]
-# [06244.627 ms] transposeWithDegree [sorted]
-# [17584.221 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+6
-# [01332.689 ms] readSnapTemporal [sorted]
-# [01597.662 ms] readSnapTemporal [unsorted]
-# [06975.711 ms] transposeWithDegree [sorted]
-# [18913.694 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+6
-# [06263.879 ms] readSnapTemporal [sorted]
-# [07612.980 ms] readSnapTemporal [unsorted]
-# [07603.789 ms] transposeWithDegree [sorted]
-# [20472.597 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+7
-# [10948.173 ms] readSnapTemporal [sorted]
-# [13276.812 ms] readSnapTemporal [unsorted]
-# [08421.293 ms] transposeWithDegree [sorted]
-# [23075.482 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+7
-# [29084.017 ms] readSnapTemporal [sorted]
-# [35400.736 ms] readSnapTemporal [unsorted]
-# [11465.749 ms] transposeWithDegree [sorted]
-# [34081.889 ms] transposeWithDegree [unsorted]
+# order: 2601977 size: 36233450 {} [92162.930 ms; buffer=1] readSnapTemporal
+# order: 2601977 size: 36233450 {} [14232.156 ms; buffer=1] transposeWithDegree
+# order: 2601977 size: 36233450 {} [92023.273 ms; buffer=2] readSnapTemporal
+# order: 2601977 size: 36233450 {} [13923.403 ms; buffer=2] transposeWithDegree
+# order: 2601977 size: 36233450 {} [91467.188 ms; buffer=4] readSnapTemporal
+# order: 2601977 size: 36233450 {} [13847.361 ms; buffer=4] transposeWithDegree
+# order: 2601977 size: 36233450 {} [91495.625 ms; buffer=8] readSnapTemporal
+# order: 2601977 size: 36233450 {} [13677.591 ms; buffer=8] transposeWithDegree
+# order: 2601977 size: 36233450 {} [90916.078 ms; buffer=16] readSnapTemporal
+# order: 2601977 size: 36233450 {} [13705.362 ms; buffer=16] transposeWithDegree
+# order: 2601977 size: 36233450 {} [91622.992 ms; buffer=32] readSnapTemporal
+# order: 2601977 size: 36233450 {} [14023.922 ms; buffer=32] transposeWithDegree
+# order: 2601977 size: 36233450 {} [97664.609 ms; buffer=64] readSnapTemporal
+# order: 2601977 size: 36233450 {} [17388.348 ms; buffer=64] transposeWithDegree
+# order: 2601977 size: 36233450 {} [104383.391 ms; buffer=128] readSnapTemporal
+# order: 2601977 size: 36233450 {} [18472.646 ms; buffer=128] transposeWithDegree
+# order: 2601977 size: 36233450 {} [99858.531 ms; buffer=256] readSnapTemporal
+# order: 2601977 size: 36233450 {} [21877.215 ms; buffer=256] transposeWithDegree
+# order: 2601977 size: 36233450 {} [105886.547 ms; buffer=512] readSnapTemporal
+# order: 2601977 size: 36233450 {} [34482.242 ms; buffer=512] transposeWithDegree
+# order: 2601977 size: 36233450 {} [124985.078 ms; buffer=1024] readSnapTemporal
+# order: 2601977 size: 36233450 {} [45205.969 ms; buffer=1024] transposeWithDegree
+# terminate called after throwing an instance of 'std::bad_alloc'
+#   what():  std::bad_alloc
 ```
 
-[![](https://i.imgur.com/AO60Lp2.gif)][sheets]
-[![](https://i.imgur.com/PfnYurJ.gif)][sheets]
-[![](https://i.imgur.com/yOU9KUs.gif)][sheets]
-[![](https://i.imgur.com/FOCek4N.gif)][sheets]
-[![](https://i.imgur.com/FNjzMwG.gif)][sheets]
-[![](https://i.imgur.com/yjf6gHQ.gif)][sheets]
-[![](https://i.imgur.com/0oJxvcN.gif)][sheets]
-[![](https://i.imgur.com/aCxMYZ5.gif)][sheets]
-[![](https://i.imgur.com/vTGHuYE.gif)][sheets]
-[![](https://i.imgur.com/Ka37H7J.gif)][sheets]
-[![](https://i.imgur.com/PMP8x2V.gif)][sheets]
-[![](https://i.imgur.com/xTkdVrU.gif)][sheets]
-[![](https://i.imgur.com/L9IsuTD.gif)][sheets]
-[![](https://i.imgur.com/sxNrmL2.gif)][sheets]
+[![](https://i.imgur.com/1fWMaq8.gif)][sheets]
+[![](https://i.imgur.com/vK1lXpi.gif)][sheets]
 
 <br>
 <br>
@@ -119,8 +69,10 @@ $ ./a.out ~/data/email-Eu-core-temporal.txt
 <br>
 <br>
 
-[![](https://i.imgur.com/DuJu78s.jpg)](https://www.youtube.com/watch?v=2k_ihEEZG-o)
+[![](https://i.imgur.com/TDOVhqW.jpg)](https://www.youtube.com/watch?v=BHi4H2TfRjU)
 
+[Prof. Dip Sankar Banerjee]: https://sites.google.com/site/dipsankarban/
+[Prof. Kishore Kothapalli]: https://cstar.iiit.ac.in/~kkishore/
 [Stanford Large Network Dataset Collection]: http://snap.stanford.edu/data/index.html
-[charts]: https://photos.app.goo.gl/c2ivFPbEXdw6ZFaM7
-[sheets]: https://docs.google.com/spreadsheets/d/1AB23nO5K71-TWe7aY6cf5Rte7jfLhfITPFBnRB_jVzM/edit?usp=sharing
+[charts]: https://photos.app.goo.gl/yaNq3gaEaufMT2ik9
+[sheets]: https://docs.google.com/spreadsheets/d/1qV-G6d3inKgpEJedt-RcvmHSePkSqG1c477d2y5sLdk/edit?usp=sharing
