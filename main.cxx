@@ -24,6 +24,7 @@ float runReadSnapTemporal(const char* type, G& x, const string& data, int edges,
   return t;
 }
 
+
 template <class G, class H>
 float runTransposeWithDegree(const char* type, const G& x, H& xt, int repeat) {
   float t = measureDurationMarked([&](auto mark) {
@@ -33,7 +34,6 @@ float runTransposeWithDegree(const char* type, const G& x, H& xt, int repeat) {
   print(xt); printf(" [%09.3f ms] transposeWithDegree [%s]\n", t, type);
   return t;
 }
-
 
 
 void runExpt(const string& data, int repeat) {
