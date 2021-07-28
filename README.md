@@ -24,89 +24,63 @@ guidance from [Prof. Dip Sankar Banerjee] and [Prof. Kishore Kothapalli].
 ```bash
 $ g++ -O3 main.cxx
 $ ./a.out ~/data/email-Eu-core-temporal.txt
+$ ./a.out ~/data/CollegeMsg.txt
+$ ...
 
-# (SHORTENED)
-# ...
+# Using graph /home/subhajit/data/email-Eu-core-temporal.txt ...
+# Temporal edges: 332335
+# order: 4930 size: 124645 {} [00257.604 ms] readSnapTemporal [sorted]
+# order: 4930 size: 124645 {} [00251.746 ms] readSnapTemporal [unsorted]
+# order: 4930 size: 124645 {} [00002.452 ms] transposeWithDegree [sorted]
+# order: 4930 size: 124645 {} [00003.188 ms] transposeWithDegree [unsorted]
 #
-# Using graph sx-stackoverflow ...
+# Using graph /home/subhajit/data/CollegeMsg.txt ...
+# Temporal edges: 59836
+# order: 9495 size: 101480 {} [00051.542 ms] readSnapTemporal [sorted]
+# order: 9495 size: 101480 {} [00048.538 ms] readSnapTemporal [unsorted]
+# order: 9495 size: 101480 {} [00001.948 ms] transposeWithDegree [sorted]
+# order: 9495 size: 101480 {} [00002.423 ms] transposeWithDegree [unsorted]
+#
+# Using graph /home/subhajit/data/sx-mathoverflow.txt ...
+# Temporal edges: 506551
+# order: 124090 size: 1199890 {} [00454.674 ms] readSnapTemporal [sorted]
+# order: 124090 size: 1199890 {} [00465.244 ms] readSnapTemporal [unsorted]
+# order: 124090 size: 1199890 {} [00034.506 ms] transposeWithDegree [sorted]
+# order: 124090 size: 1199890 {} [00060.384 ms] transposeWithDegree [unsorted]
+#
+# Using graph /home/subhajit/data/sx-askubuntu.txt ...
+# Temporal edges: 964438
+# order: 796580 size: 2984665 {} [00910.169 ms] readSnapTemporal [sorted]
+# order: 796580 size: 2984665 {} [00957.065 ms] readSnapTemporal [unsorted]
+# order: 796580 size: 2984665 {} [00107.902 ms] transposeWithDegree [sorted]
+# order: 796580 size: 2984665 {} [00209.675 ms] transposeWithDegree [unsorted]
+#
+# Using graph /home/subhajit/data/sx-superuser.txt ...
+# Temporal edges: 1443340
+# order: 970425 size: 4624430 {} [01375.067 ms] readSnapTemporal [sorted]
+# order: 970425 size: 4624430 {} [01594.650 ms] readSnapTemporal [unsorted]
+# order: 970425 size: 4624430 {} [00167.261 ms] transposeWithDegree [sorted]
+# order: 970425 size: 4624430 {} [00429.451 ms] transposeWithDegree [unsorted]
+#
+# Using graph /home/subhajit/data/wiki-talk-temporal.txt ...
+# Temporal edges: 7833141
+# order: 5700745 size: 16547960 {} [07438.125 ms] readSnapTemporal [sorted]
+# order: 5700745 size: 16547960 {} [21607.051 ms] readSnapTemporal [unsorted]
+# order: 5700745 size: 16547960 {} [00718.922 ms] transposeWithDegree [sorted]
+# order: 5700745 size: 16547960 {} [12030.658 ms] transposeWithDegree [unsorted]
+#
+# Using graph /home/subhajit/data/sx-stackoverflow.txt ...
 # Temporal edges: 63497051
-# order: 2601977 size: 36233450 {}
-#
-# # Batch size 1e+3
-# [00003.650 ms] readSnapTemporal [sorted]
-# [00002.289 ms] readSnapTemporal [unsorted]
-# [05808.473 ms] transposeWithDegree [sorted]
-# [16766.326 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+3
-# [00009.728 ms] readSnapTemporal [sorted]
-# [00010.450 ms] readSnapTemporal [unsorted]
-# [05893.706 ms] transposeWithDegree [sorted]
-# [16913.642 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+4
-# [00019.183 ms] readSnapTemporal [sorted]
-# [00018.723 ms] readSnapTemporal [unsorted]
-# [05894.552 ms] transposeWithDegree [sorted]
-# [16950.788 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+4
-# [00075.656 ms] readSnapTemporal [sorted]
-# [00080.469 ms] readSnapTemporal [unsorted]
-# [05909.356 ms] transposeWithDegree [sorted]
-# [16974.218 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+5
-# [00137.122 ms] readSnapTemporal [sorted]
-# [00156.376 ms] readSnapTemporal [unsorted]
-# [05853.389 ms] transposeWithDegree [sorted]
-# [16997.236 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+5
-# [00655.838 ms] readSnapTemporal [sorted]
-# [00779.563 ms] readSnapTemporal [unsorted]
-# [06244.627 ms] transposeWithDegree [sorted]
-# [17584.221 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+6
-# [01332.689 ms] readSnapTemporal [sorted]
-# [01597.662 ms] readSnapTemporal [unsorted]
-# [06975.711 ms] transposeWithDegree [sorted]
-# [18913.694 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+6
-# [06263.879 ms] readSnapTemporal [sorted]
-# [07612.980 ms] readSnapTemporal [unsorted]
-# [07603.789 ms] transposeWithDegree [sorted]
-# [20472.597 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 1e+7
-# [10948.173 ms] readSnapTemporal [sorted]
-# [13276.812 ms] readSnapTemporal [unsorted]
-# [08421.293 ms] transposeWithDegree [sorted]
-# [23075.482 ms] transposeWithDegree [unsorted]
-#
-# # Batch size 5e+7
-# [29084.017 ms] readSnapTemporal [sorted]
-# [35400.736 ms] readSnapTemporal [unsorted]
-# [11465.749 ms] transposeWithDegree [sorted]
-# [34081.889 ms] transposeWithDegree [unsorted]
+# order: 13009885 size: 181167250 {} [76439.016 ms] readSnapTemporal [sorted]
+# order: 13009885 size: 181167250 {} [94455.875 ms] readSnapTemporal [unsorted]
+# order: 13009885 size: 181167250 {} [10782.336 ms] transposeWithDegree [sorted]
+# order: 13009885 size: 181167250 {} [34569.242 ms] transposeWithDegree [unsorted]
 ```
 
-[![](https://i.imgur.com/AO60Lp2.gif)][sheets]
-[![](https://i.imgur.com/PfnYurJ.gif)][sheets]
-[![](https://i.imgur.com/yOU9KUs.gif)][sheets]
-[![](https://i.imgur.com/FOCek4N.gif)][sheets]
-[![](https://i.imgur.com/FNjzMwG.gif)][sheets]
-[![](https://i.imgur.com/yjf6gHQ.gif)][sheets]
-[![](https://i.imgur.com/0oJxvcN.gif)][sheets]
-[![](https://i.imgur.com/aCxMYZ5.gif)][sheets]
-[![](https://i.imgur.com/vTGHuYE.gif)][sheets]
-[![](https://i.imgur.com/Ka37H7J.gif)][sheets]
-[![](https://i.imgur.com/PMP8x2V.gif)][sheets]
-[![](https://i.imgur.com/xTkdVrU.gif)][sheets]
-[![](https://i.imgur.com/L9IsuTD.gif)][sheets]
-[![](https://i.imgur.com/sxNrmL2.gif)][sheets]
+[![](https://i.imgur.com/2nTygZh.png)][sheets]
+[![](https://i.imgur.com/yb4YZYM.png)][sheets]
+[![](https://i.imgur.com/tgXdyoR.png)][sheets]
+[![](https://i.imgur.com/mpYCYWV.png)][sheets]
 
 <br>
 <br>
