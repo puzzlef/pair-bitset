@@ -29,9 +29,9 @@ class BitsetSorted {
 
   // Read as iterable.
   public:
-  auto entries() const { return transform(ids, [](const auto& e) { return e; }); }
-  auto keys()    const { return transform(ids, [](const auto& e) { return e.first; }); }
-  auto values()  const { return transform(ids, [](const auto& e) { return e.second; }); }
+  auto entries() const { return transformIter(ids, [](const auto& e) { return e; }); }
+  auto keys()    const { return transformIter(ids, [](const auto& e) { return e.first; }); }
+  auto values()  const { return transformIter(ids, [](const auto& e) { return e.second; }); }
 
   // Read operations.
   public:

@@ -17,7 +17,7 @@ using std::cout;
 template <tclass1 B, class V=NONE, class E=NONE>
 class DiGraph {
   template <class T>
-  using Bitset = B;
+  using Bitset = B<T>;
 
   public:
   using TVertex = V;
@@ -52,6 +52,12 @@ class DiGraph {
 
   // Write operations
   public:
+  void clear() {
+    vex.clear();
+    vdata.clear();
+    edata.clear();
+  }
+
   void addVertex(int u, V d=V()) {
     if (hasVertex(u)) return;
     if (u >= span()) {
