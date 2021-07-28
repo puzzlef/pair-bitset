@@ -14,7 +14,7 @@ using namespace std;
 
 
 void runExptBatch(const string& data, bool show, int batch, int skip) {
-  DiGraphSorted<> x1;
+  DiGraph<> x1;
   DiGraphUnsorted<> x2;
   stringstream s1(data);
   stringstream s2(data);
@@ -30,7 +30,7 @@ void runExptBatch(const string& data, bool show, int batch, int skip) {
     if (!read1 || !read2) break;
     ks1 = vertices(x1);
     ks2 = vertices(x2);
-    DiGraphSorted<int> xt1;
+    DiGraph<int> xt1;
     DiGraphUnsorted<int> xt2;
     t1 = measureDuration([&] { transposeWithDegree(xt1, x1); });
     t2 = measureDuration([&] { transposeWithDegree(xt2, x2); });

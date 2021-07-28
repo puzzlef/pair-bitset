@@ -3,7 +3,6 @@
 #include <ostream>
 #include <iostream>
 #include "_main.hxx"
-#include "BitSetSorted.hxx"
 
 using std::vector;
 using std::ostream;
@@ -12,23 +11,23 @@ using std::cout;
 
 
 
-// DI-GRAPH UNSORTED
-// -----------------
+// DI-GRAPH
+// --------
 
-template <class V=NONE, class E=NONE>
-class DiGraphSorted {
+template <tclass1 B, class V=NONE, class E=NONE>
+class DiGraph {
   template <class T>
-  using BitSet = BitSetSorted<T>;
+  using Bitset = B;
 
   public:
   using TVertex = V;
   using TEdge   = E;
 
   private:
-  BitSet<E>    none;
+  Bitset<E>    none;
   vector<bool> vex;
   vector<V>    vdata;
-  vector<BitSet<E>> edata;
+  vector<Bitset<E>> edata;
   int N = 0, M = 0;
 
   // Read operations
@@ -41,10 +40,10 @@ class DiGraphSorted {
   bool hasEdge(int u, int v) const { return u < span() && edata[u].has(v); }
   auto edges(int u)          const { return u < span()? edata[u].keys() : none.keys(); }
   int degree(int u)          const { return u < span()? edata[u].size() : 0; }
-  auto vertices()      const { return filter(range(span()), [&](int u) { return  vex[u]; }); }
-  auto nonVertices()   const { return filter(range(span()), [&](int u) { return !vex[u]; }); }
-  auto inEdges(int v)  const { return filter(range(span()), [&](int u) { return edata[u].has(v); }); }
-  int inDegree(int v) const { return countIf(range(span()), [&](int u) { return edata[u].has(v); }); }
+  auto vertices()     const { return filterIter(rangeIter(span()), [&](int u) { return  vex[u]; }); }
+  auto nonVertices()  const { return filterIter(rangeIter(span()), [&](int u) { return !vex[u]; }); }
+  auto inEdges(int v) const { return filterIter(rangeIter(span()), [&](int u) { return edata[u].has(v); }); }
+  int inDegree(int v) const { return    countIf(rangeIter(span()), [&](int u) { return edata[u].has(v); }); }
 
   V vertexData(int u)   const { return hasVertex(u)? vdata[u] : V(); }
   void setVertexData(int u, V d) { if (hasVertex(u)) vdata[u] = d; }
@@ -106,8 +105,8 @@ class DiGraphSorted {
 // DI-GRAPH PRINT
 // --------------
 
-template <class V, class E>
-void write(ostream& a, const DiGraphSorted<V, E>& x, bool all=false) {
+template <tclass1 B, class V, class E>
+void write(ostream& a, const DiGraph<B, V, E>& x, bool all=false) {
   a << "order: " << x.order() << " size: " << x.size();
   if (!all) { a << " {}"; return; }
   a << " {\n";
@@ -120,8 +119,8 @@ void write(ostream& a, const DiGraphSorted<V, E>& x, bool all=false) {
   a << "}";
 }
 
-template <class V, class E>
-ostream& operator<<(ostream& a, const DiGraphSorted<V, E>& x) {
+template <tclass1 B, class V, class E>
+ostream& operator<<(ostream& a, const DiGraph<B, V, E>& x) {
   write(a, x);
   return a;
 }

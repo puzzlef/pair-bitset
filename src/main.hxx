@@ -1,9 +1,8 @@
 #pragma once
 #include "_main.hxx"
-#include "BitSetSorted.hxx"
-#include "BitSetUnsorted.hxx"
-#include "DiGraphSorted.hxx"
-#include "DiGraphUnsorted.hxx"
+#include "BitsetSorted.hxx"
+#include "BitsetUnsorted.hxx"
+#include "DiGraph.hxx"
 #include "vertices.hxx"
 #include "edges.hxx"
 #include "csr.hxx"

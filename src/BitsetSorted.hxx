@@ -6,21 +6,25 @@
 
 using std::pair;
 using std::vector;
-using std::iter_swap;
-using std::find_if;
+using std::lower_bound;
 
 
 
 
 template <class T=NONE>
-class BitSetUnsorted {
+class BitsetSorted {
   vector<pair<int, T>> ids;
 
   // Cute helpers
   private:
+  auto where(int id) const {
+    auto fc = [](const auto& e, int id) { return e.first < id; };
+    return lower_bound(ids.begin(), ids.end(), id, fc);
+  }
+
   auto lookup(int id) const {
-    auto fn = [&](const auto& e) { return e.first == id; };
-    return find_if(ids.begin(), ids.end(), fn);
+    auto it = where(id);
+    return it != ids.end() && (*it).first == id? it : ids.end();
   }
 
   // Read as iterable.
@@ -48,13 +52,14 @@ class BitSetUnsorted {
   }
 
   void add(int id, T v=T()) {
-    if (!has(id)) ids.push_back({id, v});
+    auto it = where(id);
+    if (it != ids.end() && (*it).first == id) return;
+    ids.insert(it, {id, v});
   }
 
   void remove(int id) {
     auto it = lookup(id);
     if (it == ids.end()) return;
-    iter_swap(it, ids.end()-1);
-    ids.pop_back();
+    ids.erase(it);
   }
 };
