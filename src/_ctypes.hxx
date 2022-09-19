@@ -52,3 +52,15 @@ struct None {
 #define tclass2s template <class, class, class...> class
 #define tclass3s template <class, class, class, class...> class
 #endif
+
+
+
+
+// LINEAR-SEARCH-SIZE
+// ------------------
+// For finding the number of items suitable for linear search (instead of binary search).
+
+template <class T>
+inline size_t linearSearchSize(T _=T()) {
+  return 256 / sizeof(T);
+}

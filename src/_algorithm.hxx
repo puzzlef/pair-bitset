@@ -105,14 +105,31 @@ inline bool allOf(const J& x, F fn) {
 // ------
 // Find a business or its address.
 
+template <class I, class T, class FE>
+inline auto find_value(I ib, I ie, const T& v, FE fe) {
+  auto fn = [&](const auto& u) { return fe(u, v); };
+  return find_if(ib, ie, fn);
+}
 template <class I, class T>
 inline auto find_value(I ib, I ie, const T& v) {
   return find(ib, ie, v);
+}
+
+template <class J, class T, class FE>
+inline size_t findValue(const J& x, const T& v, FE fe) {
+  auto   it = find_value(x.begin(), x.end(), v, fe);
+  return it - x.begin();
 }
 template <class J, class T>
 inline size_t findValue(const J& x, const T& v) {
   auto   it = find_value(x.begin(), x.end(), v);
   return it - x.begin();
+}
+
+template <class J, class T, class FE>
+inline size_t findValueAt(const J& x, const T& v, FE fe) {
+  auto   it = find_value(x.begin(), x.end(), v, fe);
+  return it != x.end()? it - x.begin() : size_t(-1);
 }
 template <class J, class T>
 inline size_t findValueAt(const J& x, const T& v) {
@@ -281,6 +298,85 @@ inline auto countEachUnorderedMap(const J& x, FM fm) {
 template <class J>
 inline auto countEachUnorderedMap(const J& x) {
   return count_each_unordered_map(x.begin(), x.end());
+}
+
+
+
+
+// INCLUDES-IF
+// -----------
+
+template <class I, class F>
+inline bool includes_if(I ib, I ie, F fn) {
+  return any_of(ib, ie, fn);
+}
+template <class J, class F>
+inline bool includesIf(const J& x, F fn) {
+  return includes_if(x.begin(), x.end(), fn);
+}
+
+
+template <class I, class F>
+bool includes_atleast_if(I ib, I ie, size_t n, F fn) {
+  for (; ib!=ie && n>0; ++ib)
+    if (fn(*ib)) --n;
+  return n==0;
+}
+template <class J, class F>
+inline bool includesAtleastIf(const J& x, size_t n, F fn) {
+  return includes_atleast_if(x.begin(), x.end(), n, fn);
+}
+
+
+template <class I, class T, class FE>
+inline bool includes_value(I ib, I ie, const T& v, FE fe) {
+  auto fn = [&](const auto& u) { return fe(u, v); };
+  return includes_if(ib, ie, fn);
+}
+template <class I, class T>
+inline bool includes_value(I ib, I ie, const T& v) {
+  auto fe = [](const auto& a, const auto& b) { return a == b; };
+  return includes_value(ib, ie, v, fe);
+}
+
+template <class J, class T, class FE>
+inline bool includesValue(const J& x, const T& v, FE fe) {
+  return includes_value(x.begin(), x.end(), v, fe);
+}
+template <class J, class T>
+inline bool includesValue(const J& x, const T& v) {
+  return includes_value(x.begin(), x.end(), v);
+}
+
+
+template <class IX, class IV, class A, class FV>
+bool includes_each_value_using(IX xb, IX xe, IV vb, IV ve, A& ans, FV fv) {
+  size_t n = distance(vb, ve);
+  return includes_atleast_if(xb, xe, n, [&](const auto& u) {
+    size_t i = fv(u) - vb;
+    bool got = i!=n && !ans[i];
+    if (i!=n) ans[i] = true;
+    return got;
+  });
+}
+template <class IX, class IV, class A, class FE>
+inline bool includes_each_value(IX xb, IX xe, IV vb, IV ve, A& ans, FE fe) {
+  auto fv = [&](const auto& u) { return find_value(vb, ve, u, fe); };
+  return includes_each_value_using(xb, xe, vb, ve, ans, fv);
+}
+template <class IX, class IV, class A, class FL, class FE>
+inline bool includes_each_value_ordered(IX xb, IX xe, IV vb, IV ve, A& ans, FL fl, FE fe) {
+  auto fv = [&](const auto& u) { return lower_find(vb, ve, u, fl, fe); };
+  return includes_each_value_using(xb, xe, vb, ve, ans, fv);
+}
+
+template <class JX, class JV, class A, class FE>
+inline bool includesEachValue(const JX& x, const JV& v, A& ans, FE fe) {
+  return includes_each_value(x.begin(), x.end(), v.begin(), v.end(), ans, fe);
+}
+template <class JX, class JV, class A, class FL, class FE>
+inline bool includesEachValueOrdered(const JX& x, const JV& v, A& ans, FL fl, FE fe) {
+  return includes_each_value_ordered(x.begin(), x.end(), v.begin(), v.end(), ans, fl, fe);
 }
 
 
@@ -672,6 +768,78 @@ inline auto pairsFilterIfKey(J& a, F fn) {
 template <class J, class F>
 inline auto pairsFilterIfValue(J& a, F fn) {
   auto it = pairs_filter_if_value(a.begin(), a.end(), fn);
+  return it - a.begin();
+}
+
+
+
+
+// REJECT-IF
+// ---------
+
+template <class I, class F>
+auto reject_if(I ib, I ie, I ia, F fn) {
+  for (; ib!=ie; ++ib) {
+    if (fn(*ib)) continue;
+    if (ia!=ib) *ia = move(*ib);
+    ++ia;
+  }
+  return ia;
+}
+template <class I, class F>
+inline auto reject_if(I ib, I ie, F fn) {
+  return reject_if(ib, ie, ib, fn);
+}
+template <class J, class F>
+inline size_t rejectIf(J& a, F fn) {
+  auto it = reject_if(a.begin(), a.end(), fn);
+  return it - a.begin();
+}
+
+template <class I, class F>
+auto reject_limited_if(I ib, I ie, I ia, size_t n, F fn) {
+  for (; ib!=ie; ++ib) {
+    if (n>0 && fn(*ib)) { --n; continue; }
+    if (ia!=ib) *ia = move(*ib);
+    ++ia;
+  }
+  return ia;
+}
+template <class I, class F>
+inline auto reject_limited_if(I ib, I ie, size_t n, F fn) {
+  return reject_limited_if(ib, ie, ib, n, fn);
+}
+template <class J, class F>
+inline size_t rejectLimitedIf(J& a, size_t n, F fn) {
+  auto it = reject_limited_if(a.begin(), a.end(), n, fn);
+  return it - a.begin();
+}
+
+template <class I, class F>
+auto unordered_reject_if(I ib, I ie, F fn) {
+  for (; ib!=ie;) {
+    if (!fn(*ib)) ++ib;
+    else *ib = move(*(--ie));
+  }
+  return ie;
+}
+template <class J, class F>
+inline size_t unorderedRejectIf(J& a, F fn) {
+  auto it = unordered_reject_if(a.begin(), a.end(), fn);
+  return it - a.begin();
+}
+
+template <class I, class F>
+auto unordered_reject_limited_if(I ib, I ie, size_t n, F fn) {
+  for (; ib!=ie && n>0;) {
+    if (!fn(*ib)) ++ib;
+    else { *ib = move(*(--ie)); --n; }
+  }
+  return ie;
+}
+template <class J, class F>
+inline size_t unorderedRejectLimitedIf(J& a, size_t n, F fn) {
+  auto it = unordered_reject_limited_if(a.begin(), a.end(), n, fn);
   return it - a.begin();
 }
 

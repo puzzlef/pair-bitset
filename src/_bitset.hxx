@@ -4,18 +4,21 @@
 #include <algorithm>
 #include <vector>
 #include <unordered_map>
-#include "_main.hxx"
+#include "_algorithm.hxx"
+#include "_ctypes.hxx"
+#include "_iterator.hxx"
+#include "_utility.hxx"
 
 using std::pair;
 using std::vector;
 using std::unordered_map;
 using std::out_of_range;
 using std::make_pair;
-using std::iter_swap;
+using std::move;
 using std::find_if;
 using std::lower_bound;
-using std::sort;
 using std::inplace_merge;
+using std::sort;
 
 
 
@@ -274,16 +277,16 @@ class UnorderedBitset {
     return true;
   }
 
-  inline bool remove(const K& k) {
-    auto it = locate_match(k);
-    if (it == end()) return false;
-    iter_swap(it, end()-1);
+  inline bool removeAt(size_t i) {
+    auto it = begin() + i;
+    *it = move(*(end()-1));
     data.pop_back();
     return true;
   }
-  inline bool removeAt(size_t i) {
-    auto it = begin() + i;
-    iter_swap(it, end()-1);
+  inline bool remove(const K& k) {
+    auto it = locate_match(k);
+    if (it == end()) return false;
+    *it = move(*(end()-1));
     data.pop_back();
     return true;
   }
@@ -297,6 +300,36 @@ class UnorderedBitset {
     if (it == end()) data.push_back({k, v});
     else (*it).second = v;
     return true;
+  }
+
+  template <class KS, bool ORD=false>
+  inline bool removeBatch(const KS& keys) {
+    size_t oldSize = size();
+    auto kb = keys.begin(), ke = keys.end(), kn = keys.size();
+    auto fremoves = [&](const auto& k) { remove(k); };
+    auto frejectu = [&](const auto& x) { return find_value(kb, ke, x.first) != ke; };
+    auto frejecto = [&](const auto& x) { return lower_find(kb, ke, x.first) != ke; };
+    if (kn < 4) for_each(kb, ke, fremoves);
+    else if (!ORD || kn < linearSearchSize(*kb)) unorderedRejectLimitedIf(data, kn, frejectu);
+    else unorderedRejectLimitedIf(data, kn, frejecto);
+    return size() != oldSize;
+  }
+
+  template <class PS, bool ORD=false>
+  inline bool addBatch(const PS& pairs, vector<bool>& buf) {
+    size_t oldSize = size();
+    auto pb = pairs.begin(), pe = pairs.end(), pn = pairs.size();
+    auto fadds  = [&](const auto& p) { add(p.first, p.second); };
+    auto fmarkl = [](const auto& a, const auto& b) { return a.first <  b.first; };
+    auto fmarke = [](const auto& a, const auto& b) { return a.first == b.first; };
+    if (!ORD || pn < 4) { for_each(pb, pe, fadds); return size() != oldSize; }
+    if (buf.size() < pn) buf.resize(pn);
+    fill(buf.begin(), buf.begin() + pn, false);
+    if (pn < linearSearchSize(*pb)) includesEachValue(data, pairs, buf, fmarke);
+    else includesEachValueOrdered(data, pairs, buf, fmarkl, fmarke);
+    for (size_t i=0; i<pn; ++i)
+      if (!buf[i]) data.push_back(pairs[i]);
+    return size() != oldSize;
   }
 };
 
