@@ -1137,16 +1137,83 @@ inline size_t inplaceMergeUnique(JX& x, size_t m, JB& b) {
   return it - x.begin();
 }
 template <class JX, class T, class FL, class FE>
-inline size_t inplaceMergeUnique(JX& x, size_t m, vector<T>& buf, FL fl, FE fe) {
+inline size_t inplaceMergeUniqueResize(JX& x, size_t m, vector<T>& buf, FL fl, FE fe) {
   size_t s = 2 + distance(x.begin()+m, x.end());
   if (buf.size() < s) buf.resize(s);
   auto   it = inplace_merge_unique(x.begin(), x.begin()+m, x.end(), buf.begin(), buf.end(), fl, fe);
   return it - x.begin();
 }
 template <class JX, class T>
-inline auto inplaceMergeUnique(JX& x, size_t m, vector<T>& buf) {
+inline auto inplaceMergeUniqueResize(JX& x, size_t m, vector<T>& buf) {
   size_t s = 2 + distance(x.begin()+m, x.end());
   if (buf.size() < s) buf.resize(s);
   auto   it = inplace_merge_unique(x.begin(), x.begin()+m, x.end(), buf.begin(), buf.end());
+  return it - x.begin();
+}
+
+
+
+
+// SET-UNION
+// ---------
+
+template <class IX, class IY, class IB, class FL, class FE>
+auto inplace_set_union(IX xb, IX xe, IY yb, IY ye, IB bb, IB be, FL fl, FE fe) {
+  // both `x` and `y` should be unique within themselves.
+  // `it` points to the previous target value, unlike `ix` and `iy`.
+  // `bb` -> `be` should have atleast 2 + (`yb` -> `ye`) space.
+  auto it = xb, ix = xb; auto iy = yb;
+  auto bq = bounded_deque_view(bb, be);
+  if  (ix < xe && iy < ye) {
+    bq.push_back(*(ix++));
+    *it = fl(*iy, bq.front())? *(iy++) : bq.pop_front();
+  }
+  else if (ix < xe) ++ix;
+  else if (iy < ye) ++iy;
+  else return it;
+  for (; iy < ye;) {
+    if (ix < xe) bq.push_back(*(ix++));
+    if (bq.empty()) break;
+    if (fe(*it, *iy)) { ++iy; continue; }
+    *(++it) = fl(*iy, bq.front())? *(iy++) : bq.pop_front();
+  }
+  for (; !bq.empty();) {
+    if (ix < xe) bq.push_back(*(ix++));
+    *(++it) = bq.pop_front();
+  }
+  for (; iy < ye; ++iy)
+    if (!fe(*it, *iy)) *(++it) = *iy;
+  return ++it;
+}
+template <class IX, class IY, class IB>
+inline auto inplace_set_union(IX xb, IX xe, IY yb, IY ye, IB bb, IB be) {
+  auto fl = [](const auto& a, const auto& b) { return a < b; };
+  auto fe = [](const auto& a, const auto& b) { return a == b; };
+  return inplace_set_union(xb, xe, yb, ye, bb, be, fl, fe);
+}
+
+template <class JX, class JY, class JB, class FL, class FE>
+inline size_t inplaceSetUnion(JX& x, const JY& y, JB& b, FL fl, FE fe) {
+  auto   it = inplace_set_union(x.begin(), x.end(), y.begin(), y.end(), b.begin(), b.end(), fl, fe);
+  return it - x.begin();
+}
+template <class JX, class JY, class JB>
+inline size_t inplaceSetUnion(JX& x, const JY& y, JB& b) {
+  auto   it = inplace_set_union(x.begin(), x.end(), y.begin(), y.end(), b.begin(), b.end());
+  return it - x.begin();
+}
+
+template <class JX, class JY, class TX, class FL, class FE>
+inline size_t inplaceSetUnionResize(JX& x, const JY& y, vector<TX>& buf, FL fl, FE fe) {
+  size_t s = 2 + distance(y.begin(), y.end());
+  if (buf.size() < s) buf.resize(s);
+  auto   it = inplace_set_union(x.begin(), x.end(), y.begin(), y.end(), buf.begin(), buf.end(), fl, fe);
+  return it - x.begin();
+}
+template <class JX, class JY, class TX>
+inline size_t inplaceSetUnionResize(JX& x, const JY& y, vector<TX>& buf) {
+  size_t s = 2 + distance(y.begin(), y.end());
+  if (buf.size() < s) buf.resize(s);
+  auto   it = inplace_set_union(x.begin(), x.end(), y.begin(), y.end(), buf.begin(), buf.end());
   return it - x.begin();
 }

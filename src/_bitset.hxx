@@ -190,6 +190,17 @@ using std::sort;
 #endif
 
 
+#ifndef BITSET_CORRECT
+#define BITSET_CORRECT(K, V) \
+  inline bool correct(bool unq, vector<pair<K, V>>& buf) { \
+    return false; \
+  } \
+  inline bool correct(bool unq=false) { \
+    return false; \
+  }
+#endif
+
+
 #ifndef BITSET_ADD_UNCHECKED
 #define BITSET_ADD_UNCHECKED(K, V) \
   inline bool addUnchecked(const K& k, const V& v=V()) { \
@@ -271,6 +282,7 @@ class UnorderedBitset {
 
   // Update operations.
   public:
+  BITSET_CORRECT(K, V)
   BITSET_FILTER_IF(K, V, data)
   inline bool clear() noexcept {
     data.clear();
@@ -341,8 +353,8 @@ inline auto unorderedBitset(K _k=K(), V _v=V()) {
 
 
 
-// BITSET (SORTED)
-// ---------------
+// ORDERED-BITSET
+// --------------
 // An integer set that constantly checks duplicates.
 // It maintains integers in ascending value order.
 
@@ -386,6 +398,7 @@ class OrderedBitset {
   ORDERED_BITSET_LOCATE(K, V, inline, const noexcept)
   public:
   BITSET_FIND(K, V, data)
+  BITSET_FINDAT(K, V, data)
 
 
   // Access operations.
@@ -401,7 +414,7 @@ class OrderedBitset {
 
   // Update operations.
   public:
-  BITSET_CORRECT_NONE(K, V)
+  BITSET_CORRECT(K, V)
   BITSET_FILTER_IF(K, V, data)
   inline bool clear() noexcept {
     if (empty()) return false;
@@ -409,19 +422,52 @@ class OrderedBitset {
     return true;
   }
 
+  inline bool removeAt(size_t i) {
+    auto it = begin() + i;
+    data.erase(it);
+    return true;
+  }
+  inline bool remove(const K& k) {
+    auto it = locate_match(k);
+    if (it == end()) return false;
+    data.erase(it);
+    return true;
+  }
+
+  BITSET_ADD_UNCHECKED(K, V)
   inline bool add(const K& k, const V& v=V()) {
     auto it = locate_spot(k);
     if (it != end() && (*it).first == k) (*it).second = v;
     else data.insert(it, {k, v});
     return true;
   }
-  BITSET_ADD_UNCHECKED(K, V)
 
-  inline bool remove(const K& k) {
-    auto it = locate_match(k);
-    if (it == end()) return false;
-    data.erase(it);
-    return true;
+  template <class KS, bool ORD=false>
+  inline bool removeBatch(const KS& keys) {
+    size_t oldSize = size();
+    auto kb = keys.begin(), ke = keys.end(), kn = keys.size();
+    auto fremoves = [&](const auto& k) { remove(k); };
+    auto frejectu = [&](const auto& x) { return find_value(kb, ke, x.first) != ke; };
+    auto frejecto = [&](const auto& x) { return lower_find(kb, ke, x.first) != ke; };
+    if (kn < 2) for_each(kb, ke, fremoves);
+    else if (!ORD || kn < linearSearchSize(*kb)) rejectLimitedIf(data, kn, frejectu);
+    else rejectLimitedIf(data, kn, frejecto);
+    return size() != oldSize;
+  }
+
+  template <class PS, bool ORD=false>
+  inline bool addBatch(const PS& pairs, vector<pair<K, V>>& buf) {
+    size_t oldSize = size();
+    auto pb = pairs.begin(), pe = pairs.end(), pn = pairs.size();
+    auto fadds = [&](const auto& p) { add(p.first, p.second); };
+    auto fcmpl = [](const auto& a, const auto& b) { return a.first <  b.first; };
+    auto fcmpe = [](const auto& a, const auto& b) { return a.first == b.first; };
+    if (!ORD || pn < 2) { for_each(pb, pe, fadds); return size() != oldSize; }
+    else {
+      data.resize(data.size() + pairs.size());
+      data.resize(inplaceSetUnionResize(data, pairs, buf, fcmpl, fcmpe));
+    }
+    return size() != oldSize;
   }
 };
 
