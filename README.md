@@ -1,5 +1,7 @@
 Testing the effectiveness of **sorted** vs **unsorted** list of integers for BitSet.
 
+`TODO`
+
 This experiment was for comparing performance between:
 1. Read graph edges to **sorted bitset** based DiGraph & transpose.
 2. Read graph edges to **unsorted bitset** based DiGraph & transpose.

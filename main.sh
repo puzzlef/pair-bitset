@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-src="bitset-sorted-vs-unsorted"
+src="bitset-batched-sorted-vs-unsorted"
 out="/home/resources/Documents/subhajit/$src.log"
 ulimit -s unlimited
 printf "" > "$out"
@@ -10,11 +10,11 @@ git clone https://github.com/puzzlef/$src
 cd $src
 
 # Run
-g++ -O3 main.cxx
-stdbuf --output=L ./a.out ~/data/email-Eu-core-temporal.txt 2>&1 | tee -a "$out"
+g++ -std=c++17 -O3 main.cxx
 stdbuf --output=L ./a.out ~/data/CollegeMsg.txt             2>&1 | tee -a "$out"
+stdbuf --output=L ./a.out ~/data/email-Eu-core-temporal.txt 2>&1 | tee -a "$out"
 stdbuf --output=L ./a.out ~/data/sx-mathoverflow.txt        2>&1 | tee -a "$out"
 stdbuf --output=L ./a.out ~/data/sx-askubuntu.txt           2>&1 | tee -a "$out"
 stdbuf --output=L ./a.out ~/data/sx-superuser.txt           2>&1 | tee -a "$out"
-stdbuf --output=L ./a.out ~/data/wiki-talk-temporal.txt     2>&1 | tee -a "$out"
 stdbuf --output=L ./a.out ~/data/sx-stackoverflow.txt       2>&1 | tee -a "$out"
+stdbuf --output=L ./a.out ~/data/wiki-talk-temporal.txt     2>&1 | tee -a "$out"
