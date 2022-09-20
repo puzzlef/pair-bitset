@@ -347,7 +347,8 @@ class UnorderedBitset {
   template <bool ORD, class KS>
   inline bool removeBatch(const KS& keys) {
     auto db = begin(), de = end();
-    auto kb = keys.begin(), ke = keys.end(); size_t kn = keys.size();
+    auto kb = keys.begin(), ke = keys.end();
+    size_t kn = keys.size();
     if (kn==0) return false;
     if (kn==1) return remove(*kb);
     auto it = unordered_bitset_remove_batch<ORD>(db, de, kb, ke, kn);
@@ -358,7 +359,8 @@ class UnorderedBitset {
   template <class PS, bool ORD=false>
   inline bool addBatch(const PS& pairs, vector<bool>& buf) {
     auto db = begin(), de = end();
-    auto pb = pairs.begin(), pe = pairs.end(); size_t pn = pairs.size();
+    auto pb = pairs.begin(), pe = pairs.end();
+    size_t pn = pairs.size();
     if (pn==0) return false;
     if (pn==1) return add((*pb).first, (*pb).second);
     auto it = unordered_bitset_add_batch(db, de, pb, pe, pn, back_inserter(data), buf);
@@ -429,8 +431,12 @@ class LazyUnorderedBitset {
   // Update operations.
   public:
   inline bool correct(vector<bool>& buf) {
-    auto db = begin(), de = end(), pb = de, pe = data.end(); size_t pn = data.size() - size();
-    auto kb = removed.begin(), ke = removed.end(); size_t kn = removed.size();
+    BITSET_FCOMPARES(fl, fe)
+    auto db = begin(), de = end();
+    auto kb = removed.begin(), ke = sorted_unique(kb, removed.end());
+    auto pb = de, pe = sorted_unique(pb, data.end(), fl, fe);
+    size_t kn = distance(kb, ke);
+    size_t pn = distance(pb, pe);
     auto ir = unordered_bitset_remove_batch<ORD>(db, de, kb, ke, kn);
     bool wasRemoved = ir != de;
     auto ia = unordered_bitset_add_batch(db, ir, pb, pe, pn, ir, buf);
@@ -509,8 +515,8 @@ auto ordered_bitset_remove_batch(ID db, ID de, IK kb, IK ke, size_t kn) {
   return reject_limited_if(db, de, kn, fo);
 }
 
-template <class ID, class IP, class IA>
-auto ordered_bitset_add_batch(ID db, ID de, IP pb, IP pe, size_t pn, vector<bool>& buf) {
+template <class ID, class IP, class P>
+auto ordered_bitset_add_batch(ID db, ID de, IP pb, IP pe, size_t pn, vector<P>& buf) {
   BITSET_FCOMPARES(fl, fe)
   if (buf.size() < pn+2) buf.resize(pn+2);  // see inplace_set_union()
   return inplace_set_union(db, de, pb, pe, buf.begin(), buf.end());
@@ -596,7 +602,8 @@ class OrderedBitset {
   template <bool ORD, class KS>
   inline bool removeBatch(const KS& keys) {
     auto db = begin(), de = end();
-    auto kb = keys.begin(), ke = keys.end(); size_t kn = keys.size();
+    auto kb = keys.begin(), ke = keys.end();
+    size_t kn = keys.size();
     if (kn==0) return false;
     if (kn==1) return remove(*kb);
     auto it = ordered_bitset_remove_batch<ORD>(db, de, kb, ke, kn);
@@ -607,7 +614,8 @@ class OrderedBitset {
   template <bool ORD, class PS>
   inline bool addBatch(const PS& pairs, vector<pair<K, V>>& buf) {
     auto db = begin(), de = end(), it = de;
-    auto pb = pairs.begin(), pe = pairs.end(); size_t pn = pairs.size();
+    auto pb = pairs.begin(), pe = pairs.end();
+    size_t pn = pairs.size();
     auto fp = [&](const auto& p) { if (add(p.first, p.second)) ++it; };
     if (pn==0) return false;
     if (pn==1 || !ORD) { for_each(pb, pe, fp); return it != de; }
@@ -681,8 +689,12 @@ class LazyOrderedBitset {
   // Update operations.
   public:
   inline bool correct(vector<pair<K, V>>& buf) {
-    auto db = begin(), de = end(), pb = de, pe = data.end(); size_t pn = data.size() - size();
-    auto kb = removed.begin(), ke = removed.end(); size_t kn = removed.size();
+    BITSET_FCOMPARES(fl, fe)
+    auto db = begin(), de = end();
+    auto kb = removed.begin(), ke = sorted_unique(kb, removed.end());
+    auto pb = de, pe = sorted_unique(pb, data.end(), fl, fe);
+    size_t kn = distance(kb, ke);
+    size_t pn = distance(pb, pe);
     auto ir = ordered_bitset_remove_batch<ORD>(db, de, kb, ke, kn);
     bool wasRemoved = ir != de;
     auto ia = ordered_bitset_add_batch(db, ir, pb, pe, pn, buf);
