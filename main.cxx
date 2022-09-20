@@ -14,11 +14,11 @@ using namespace std;
 
 
 template <class G>
-float runReadSnapTemporal(const char* type, G& x, const string& data, int edges, int repeat) {
+float runReadSnapTemporal(const char* type, G& x, const string& data, size_t edges, int repeat) {
   float t = measureDurationMarked([&](auto mark) {
     x.clear();
     stringstream s(data);
-    mark([&] { readSnapTemporal(x, s, edges); });
+    mark([&] { readSnapTemporalW(x, s, edges); });
   }, repeat);
   print(x); printf(" [%09.3f ms] readSnapTemporal [%s]\n", t, type);
   return t;
@@ -29,7 +29,7 @@ template <class G, class H>
 float runTransposeWithDegree(const char* type, const G& x, H& xt, int repeat) {
   float t = measureDurationMarked([&](auto mark) {
     xt.clear();
-    mark([&] { transposeWithDegree(xt, x); });
+    mark([&] { transposeWithDegreeW(xt, x); });
   }, repeat);
   print(xt); printf(" [%09.3f ms] transposeWithDegree [%s]\n", t, type);
   return t;
@@ -37,20 +37,29 @@ float runTransposeWithDegree(const char* type, const G& x, H& xt, int repeat) {
 
 
 void runExpt(const string& data, int repeat) {
-  int edges = countLines(data);
-  printf("Temporal edges: %d\n", edges);
-  DiGraph<BitsetSorted> x1;
-  DiGraph<BitsetUnsorted> x2;
-  DiGraph<BitsetSorted, int> xt1;
-  DiGraph<BitsetUnsorted, int> xt2;
+  UnorderedDiGraph<>     x1;
+  LazyUnorderedDiGraph<> x2;
+  OrderedDiGraph<>       x3;
+  LazyOrderedDiGraph<>   x4;
+  UnorderedDiGraph<int, int>     xt1;
+  LazyUnorderedDiGraph<int, int> xt2;
+  OrderedDiGraph<int, int>       xt3;
+  LazyOrderedDiGraph<int, int>   xt4;
+
+  size_t edges = countLines(data);
+  printf("Temporal edges: %zu\n", edges);
 
   // Read temporal graph.
-  runReadSnapTemporal("sorted", x1, data, edges, repeat);
-  runReadSnapTemporal("unsorted", x2, data, edges, repeat);
+  runReadSnapTemporal("unordered",      x1, data, edges, repeat);
+  runReadSnapTemporal("lazy-unordered", x2, data, edges, repeat);
+  runReadSnapTemporal("ordered",        x3, data, edges, repeat);
+  runReadSnapTemporal("lazy-ordered",   x4, data, edges, repeat);
 
   // Transpose graph.
-  runTransposeWithDegree("sorted", x1, xt1, repeat);
-  runTransposeWithDegree("unsorted", x2, xt2, repeat);
+  runTransposeWithDegree("unordered",      x1, xt1, repeat);
+  runTransposeWithDegree("lazy-unordered", x2, xt2, repeat);
+  runTransposeWithDegree("ordered",        x1, xt1, repeat);
+  runTransposeWithDegree("lazy-ordered",   x2, xt2, repeat);
 }
 
 

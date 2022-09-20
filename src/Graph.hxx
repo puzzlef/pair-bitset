@@ -18,10 +18,6 @@ using std::cout;
 // Helps create graphs.
 
 #ifndef GRAPH_TYPES
-#define GRAPH_SHORT_TYPES_FROM(G) \
-  using K = typename G::key_type; \
-  using V = typename G::vertex_value_type; \
-  using E = typename G::edge_value_type;
 #define GRAPH_TYPES(K, V, E) \
   using key_type = K; \
   using vertex_key_type   = K; \
@@ -30,23 +26,29 @@ using std::cout;
   using edge_key_type     = K; \
   using edge_value_type   = E; \
   using edge_pair_type    = pair<K, E>;
+
+#define GRAPH_SHORT_TYPES_FROM(G) \
+  using K = typename G::key_type; \
+  using V = typename G::vertex_value_type; \
+  using E = typename G::edge_value_type;
 #endif
 
 
 #ifndef GRAPH_SIZE
 #define GRAPH_SIZE(K, V, E, N, M, vexists)  \
-  inline K span()  const noexcept { return vexists.size(); } \
-  inline K order() const noexcept { return N; } \
+  inline K span()      const noexcept { return vexists.size(); } \
+  inline K order()     const noexcept { return N; } \
   inline size_t size() const noexcept { return M; }
-#define GRAPH_SIZE_FROM(K, V, E, x) \
-  inline K span()  const noexcept { return x.span(); } \
-  inline K order() const noexcept { return x.order(); } \
-  inline size_t size() const noexcept { return x.size(); }
 #define GRAPH_EMPTY(K, V, E) \
-  inline bool empty()   const noexcept { return order() == 0; }
+  inline bool empty()  const noexcept { return order() == 0; }
 #define GRAPH_SIZES(K, V, E, N, M, vexists) \
   GRAPH_SIZE(K, V, E, N, M, vexists) \
   GRAPH_EMPTY(K, V, E)
+
+#define GRAPH_SIZE_FROM(K, V, E, x) \
+  inline K span()      const noexcept { return x.span(); } \
+  inline K order()     const noexcept { return x.order(); } \
+  inline size_t size() const noexcept { return x.size(); }
 #define GRAPH_SIZES_FROM(K, V, E, x) \
   GRAPH_SIZE_FROM(K, V, E, x) \
   GRAPH_EMPTY(K, V, E)
@@ -56,13 +58,14 @@ using std::cout;
 #ifndef GRAPH_DIRECTED
 #define GRAPH_DIRECTED(K, V, E, de) \
   inline bool directed()   const noexcept { return de; }
-#define GRAPH_DIRECTED_FROM(K, V, E, x) \
-  inline bool directed()   const noexcept { return x.directed(); }
 #define GRAPH_UNDIRECTED(K, V, E) \
   inline bool undirected() const noexcept { return !directed(); }
 #define GRAPH_DIRECTEDNESS(K, V, E, de) \
   GRAPH_DIRECTED(K, V, E, de) \
   GRAPH_UNDIRECTED(K, V, E)
+
+#define GRAPH_DIRECTED_FROM(K, V, E, x) \
+  inline bool directed()   const noexcept { return x.directed(); }
 #define GRAPH_DIRECTEDNESS_FROM(K, V, E, x) \
   GRAPH_DIRECTED_FROM(K, V, E, x) \
   GRAPH_UNDIRECTED(K, V, E)
@@ -83,6 +86,7 @@ using std::cout;
     auto pairs = pairIterable(vkeys, vvalues); \
     return conditionalIterable(pairs, vexists); \
   }
+
 #define GRAPH_CEDGES(K, V, E, eto, enone) \
   inline auto cedgeKeys(const K& u) const noexcept { \
     return u<span()? eto[u].ckeys()   : enone.ckeys(); \
@@ -93,6 +97,7 @@ using std::cout;
   inline auto cedges(const K& u) const noexcept { \
     return u<span()? eto[u].cpairs()  : enone.cpairs(); \
   }
+
 #define GRAPH_CINEDGES(K, V, E, efrom, enone) \
   inline auto cinEdgeKeys(const K& v) const noexcept { \
     return v<span()? efrom[v].ckeys()   : enone.ckeys(); \
@@ -103,6 +108,7 @@ using std::cout;
   inline auto cinEdges(const K& v) const noexcept { \
     return v<span()? efrom[v].cpairs()  : enone.cpairs(); \
   }
+
 #define GRAPH_CINEDGES_SEARCH(K, V, E, eto) \
   inline auto cinEdgeKeys(const K& v) const noexcept { \
     auto vkeys = rangeIterable(span()); \
@@ -175,6 +181,7 @@ using std::cout;
     for (K u = K(); u < span(); ++u) \
       if (vexists[u]) fn(u, vvalues[u]); \
   }
+
 #define GRAPH_CFOREACH_XEDGE(K, V, E, name, u, fn, eto) \
   template <class F> \
   inline void cforEach##name##Key(const K& u, F fn) const noexcept { \
@@ -188,6 +195,7 @@ using std::cout;
   inline void cforEach##name(const K& u, F fn) const noexcept { \
     if (u < span()) eto[u].cforEach(fn); \
   }
+
 #define GRAPH_CFOREACH_INEDGE_SEARCH(K, V, E, eto) \
   template <class F> \
   inline void cforEachInEdgeKey(const K& v, F fn) const noexcept { \
@@ -204,6 +212,7 @@ using std::cout;
     for (K u = K(); u < span(); ++u) \
       if (eto[u].has(v)) fn(u, eto[u][v]); \
   }
+
 #define GRAPH_CFOREACH_EDGE(K, V, E, eto) \
   GRAPH_CFOREACH_XEDGE(K, V, E, Edge, u, fn, eto)
 #define GRAPH_CFOREACH_INEDGE(K, V, E, efrom) \
@@ -362,10 +371,11 @@ using std::cout;
 
 
 #ifndef GRAPH_CORRECT
-#define GRAPH_CORRECT(K, V, E, M, unq, buf, u, e0, e1) \
-  inline bool correct(bool unq=false) { \
-    bool a = false; M = 0; \
-    vector<pair<K, E>> buf; \
+#define GRAPH_CORRECT(K, V, E, M, buf, u, e0, e1) \
+  inline bool correct() { \
+    using B = typename Bitset<K, E>::buffer_type; \
+    bool  a = false; M = 0; \
+    vector<B> buf; \
     cforEachVertexKey([&](const K& u) { \
       a |= e0; \
       a |= e1; \
@@ -505,7 +515,7 @@ using std::cout;
 
 #ifndef GRAPH_CORRECT_FROM
 #define GRAPH_CORRECT_FROM(K, V, E, x) \
-  inline bool correct(bool unq=false) noexcept { return x.correct(unq); }
+  inline bool correct() noexcept { return x.correct(); }
 #define GRAPH_CLEAR_FROM(K, V, E, x) \
   inline bool clear() noexcept { return x.clear(); }
 #define GRAPH_RESIZE_FROM(K, V, E, x) \
@@ -542,7 +552,7 @@ using std::cout;
 // --------
 // Directed graph that memorizes in- and out-edges for each vertex.
 
-template <class K=int, class V=NONE, class E=NONE, tclass2 Bitset=ROrderedBitset>
+template <class K=int, class V=NONE, class E=NONE, tclass2 Bitset=OrderedBitset>
 class DiGraph {
   // Data.
   protected:
@@ -551,6 +561,8 @@ class DiGraph {
   vector<V>    vvalues;
   vector<Bitset<K, E>> eto;
   vector<Bitset<K, E>> efrom;
+  // vector2d<K>  eremoved;
+  // vector2d<K>  eadded;
   Bitset<K, E> enone;
 
   // Types.
@@ -593,7 +605,7 @@ class DiGraph {
 
   // Update operations.
   public:
-  GRAPH_CORRECT(K, V, E, M, unq, buf, u, eto[u].correct(unq, buf), efrom[u].correct(unq, buf))
+  GRAPH_CORRECT(K, V, E, M, buf, u, eto[u].correct(buf), efrom[u].correct(buf))
   GRAPH_CLEAR(K, V, E, N, M, vexists, vvalues, eto, efrom)
   GRAPH_RESIZE(K, V, E, vexists, vvalues, eto, efrom)
   GRAPH_ADD_VERTEX(K, V, E, N, vexists, vvalues)
@@ -605,13 +617,13 @@ class DiGraph {
 };
 
 template <class K=int, class V=NONE, class E=NONE>
-using UnorderedDiGraph = DiGraph<K, V, E, UnorderedBitset>;
+using UnorderedDiGraph     = DiGraph<K, V, E, UnorderedBitset>;
 template <class K=int, class V=NONE, class E=NONE>
-using OrderedDiGraph   = DiGraph<K, V, E, OrderedBitset>;
+using LazyUnorderedDiGraph = DiGraph<K, V, E, LazyUnorderedBitset>;
 template <class K=int, class V=NONE, class E=NONE>
-using POrderedDiGraph  = DiGraph<K, V, E, POrderedBitset>;
+using OrderedDiGraph       = DiGraph<K, V, E, OrderedBitset>;
 template <class K=int, class V=NONE, class E=NONE>
-using ROrderedDiGraph  = DiGraph<K, V, E, ROrderedBitset>;
+using LazyOrderedDiGraph   = DiGraph<K, V, E, LazyOrderedBitset>;
 
 
 
@@ -620,7 +632,7 @@ using ROrderedDiGraph  = DiGraph<K, V, E, ROrderedBitset>;
 // ------------
 // Directed graph that memorizes only out-edges for each vertex.
 
-template <class K=int, class V=NONE, class E=NONE, tclass2 Bitset=ROrderedBitset>
+template <class K=int, class V=NONE, class E=NONE, tclass2 Bitset=OrderedBitset>
 class OutDiGraph {
   // Data.
   protected:
@@ -670,7 +682,7 @@ class OutDiGraph {
 
   // Update operations.
   public:
-  GRAPH_CORRECT(K, V, E, M, unq, buf, u, eto[u].correct(unq, buf), false)
+  GRAPH_CORRECT(K, V, E, M, buf, u, eto[u].correct(buf), false)
   GRAPH_CLEAR_SEARCH(K, V, E, N, M, vexists, vvalues, eto)
   GRAPH_RESIZE_SEARCH(K, V, E, vexists, vvalues, eto)
   GRAPH_ADD_VERTEX(K, V, E, N, vexists, vvalues)
@@ -682,13 +694,13 @@ class OutDiGraph {
 };
 
 template <class K=int, class V=NONE, class E=NONE>
-using UnorderedOutDiGraph = OutDiGraph<K, V, E, UnorderedBitset>;
+using UnorderedOutDiGraph     = OutDiGraph<K, V, E, UnorderedBitset>;
 template <class K=int, class V=NONE, class E=NONE>
-using OrderedOutDiGraph   = OutDiGraph<K, V, E, OrderedBitset>;
+using LazyUnorderedOutDiGraph = OutDiGraph<K, V, E, LazyUnorderedBitset>;
 template <class K=int, class V=NONE, class E=NONE>
-using POrderedOutDiGraph  = OutDiGraph<K, V, E, POrderedBitset>;
+using OrderedOutDiGraph       = OutDiGraph<K, V, E, OrderedBitset>;
 template <class K=int, class V=NONE, class E=NONE>
-using ROrderedOutDiGraph  = OutDiGraph<K, V, E, ROrderedBitset>;
+using LazyOrderedOutDiGraph   = OutDiGraph<K, V, E, LazyOrderedBitset>;
 
 
 
@@ -697,7 +709,7 @@ using ROrderedOutDiGraph  = OutDiGraph<K, V, E, ROrderedBitset>;
 // -----
 // Undirected graph.
 
-template <class K=int, class V=NONE, class E=NONE, tclass2 Bitset=ROrderedBitset>
+template <class K=int, class V=NONE, class E=NONE, tclass2 Bitset=OrderedBitset>
 class Graph : public OutDiGraph<K, V, E, Bitset> {
   using G = OutDiGraph<K, V, E, Bitset>;
 
@@ -745,13 +757,13 @@ class Graph : public OutDiGraph<K, V, E, Bitset> {
 };
 
 template <class K=int, class V=NONE, class E=NONE>
-using UnorderedGraph = Graph<K, V, E, UnorderedBitset>;
+using UnorderedGraph     = Graph<K, V, E, UnorderedBitset>;
 template <class K=int, class V=NONE, class E=NONE>
-using OrderedGraph   = Graph<K, V, E, OrderedBitset>;
+using LazyUnorderedGraph = Graph<K, V, E, LazyUnorderedBitset>;
 template <class K=int, class V=NONE, class E=NONE>
-using POrderedGraph  = Graph<K, V, E, POrderedBitset>;
+using OrderedGraph       = Graph<K, V, E, OrderedBitset>;
 template <class K=int, class V=NONE, class E=NONE>
-using ROrderedGraph  = Graph<K, V, E, ROrderedBitset>;
+using LazyOrderedGraph   = Graph<K, V, E, LazyOrderedBitset>;
 
 
 

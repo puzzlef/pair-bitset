@@ -40,6 +40,12 @@ using std::sort;
 #endif
 
 
+#ifndef BITSET_IS_LAZY
+#define BITSET_IS_LAZY(ans) \
+  inline constexpr bool isLazy() const { return ans; }
+#endif
+
+
 #ifndef BITSET_ITERATOR
 #define BITSET_ITERATOR_RANGE(K, V, db, de) \
   ITERABLE_ITERATOR(inline, noexcept, db, de)
@@ -276,6 +282,7 @@ class UnorderedBitset {
   // Types.
   public:
   BITSET_TYPES(K, V, bool, data)
+  BITSET_IS_LAZY(false)
 
 
   // Iterator operations.
@@ -394,6 +401,7 @@ class LazyUnorderedBitset {
   // Types.
   public:
   BITSET_TYPES(K, V, bool, data)
+  BITSET_IS_LAZY(true)
 
 
   // Iterator operations.
@@ -532,6 +540,7 @@ class OrderedBitset {
   // Types.
   public:
   BITSET_TYPES(K, V, pair<K, V>, data)
+  BITSET_IS_LAZY(false)
 
 
   // Iterator operations.
@@ -652,6 +661,7 @@ class LazyOrderedBitset {
   // Types.
   public:
   BITSET_TYPES(K, V, pair<K, V>, data)
+  BITSET_IS_LAZY(true)
 
 
   // Iterator operations.
