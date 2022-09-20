@@ -363,7 +363,7 @@ class UnorderedBitset {
     return it != de;
   }
 
-  template <class PS, bool ORD=false>
+  template <bool ORD, class PS>
   inline bool addBatch(const PS& pairs, vector<bool>& buf) {
     auto db = begin(), de = end();
     auto pb = pairs.begin(), pe = pairs.end();

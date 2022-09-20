@@ -1,11 +1,6 @@
-#include <cmath>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <cstdio>
-#include <iostream>
+#include <cassert>
 #include <utility>
-#include <algorithm>
+#include <vector>
 #include "src/main.hxx"
 
 using namespace std;
@@ -13,62 +8,67 @@ using namespace std;
 
 
 
-template <class G>
-float runReadSnapTemporal(const char* type, G& x, const string& data, size_t edges, int repeat) {
-  float t = measureDurationMarked([&](auto mark) {
-    x.clear();
-    stringstream s(data);
-    mark([&] { readSnapTemporalW(x, s, edges); });
-  }, repeat);
-  print(x); printf(" [%09.3f ms] readSnapTemporal [%s]\n", t, type);
-  return t;
-}
-
-
-template <class G, class H>
-float runTransposeWithDegree(const char* type, const G& x, H& xt, int repeat) {
-  float t = measureDurationMarked([&](auto mark) {
-    xt.clear();
-    mark([&] { transposeWithDegreeW(xt, x); });
-  }, repeat);
-  print(xt); printf(" [%09.3f ms] transposeWithDegree [%s]\n", t, type);
-  return t;
-}
-
-
-void runExpt(const string& data, int repeat) {
-  UnorderedDiGraph<>     x1;
-  LazyUnorderedDiGraph<> x2;
-  OrderedDiGraph<>       x3;
-  LazyOrderedDiGraph<>   x4;
-  UnorderedDiGraph<int, int>     xt1;
-  LazyUnorderedDiGraph<int, int> xt2;
-  OrderedDiGraph<int, int>       xt3;
-  LazyOrderedDiGraph<int, int>   xt4;
-
-  size_t edges = countLines(data);
-  printf("Temporal edges: %zu\n", edges);
-
-  // Read temporal graph.
-  runReadSnapTemporal("unordered",      x1, data, edges, repeat);
-  runReadSnapTemporal("lazy-unordered", x2, data, edges, repeat);
-  runReadSnapTemporal("ordered",        x3, data, edges, repeat);
-  runReadSnapTemporal("lazy-ordered",   x4, data, edges, repeat);
-
-  // Transpose graph.
-  runTransposeWithDegree("unordered",      x1, xt1, repeat);
-  runTransposeWithDegree("lazy-unordered", x2, xt2, repeat);
-  runTransposeWithDegree("ordered",        x1, xt1, repeat);
-  runTransposeWithDegree("lazy-ordered",   x2, xt2, repeat);
+template <class B>
+void runExpt(B& x) {
+  using K = typename B::key_type;
+  using V = typename B::value_type;
+  using W = typename B::buffer_type;
+  vector<W> buf;
+  // Check if bitset if empty.
+  assert(x.empty());
+  assert(x.size() == 0);
+  // Check add behaviour.
+  for (K i=0; i<100; ++i)
+    x.add(i % 10, i);
+  x.correct(buf);
+  assert(x.size() == 10);
+  for (K i=90; i<100; ++i)
+    assert(x.get(i % 10) == i);
+  // Check remove behaviour.
+  for (K i=0; i<100; ++i)
+    x.remove((i % 10) & 0xFE);
+  x.correct(buf);
+  assert(x.size() == 5);
+  for (K i=90; i<100; ++i)
+    if (i & 1 == 1) assert(x.get(i % 10) == i);
+  // Check clear behaviour.
+  x.clear();
+  assert(x.size() == 0);
+  // Check remove + add batch behaviour.
+  vector<K> removes;
+  vector<pair<K, V>> adds;
+  for (K i=0; i<100; ++i)
+    x.add(i % 20, i);
+  x.correct(buf);
+  for (K i=0; i<100; ++i)
+    removes.push_back((i % 20) & 0xFE);
+  for (K i=0; i<100; ++i)
+    adds.push_back({i % 10, i});
+  removes.resize(sortedUnique(removes));
+  adds.resize(sortedUnique(adds));
+  x.removeBatch<true>(removes);
+  x.addBatch<true>(adds, buf);
+  x.correct(buf);
+  assert(x.size() == 15);
+  for (K i=90; i<100; ++i)
+    assert(x.get(i % 10) == i);
+  for (K i=91; i<100; i+=2)
+    assert(x.get(i % 20) == i);
 }
 
 
 int main(int argc, char **argv) {
-  char *file = argv[1];
-  int repeat = argc>2? stoi(argv[2]) : 5;
-  printf("Using graph %s ...\n", file);
-  string d = readFile(file);
-  runExpt(d, repeat);
-  printf("\n");
+  UnorderedBitset<int, float>     x1;
+  OrderedBitset<int, float>       x2;
+  LazyUnorderedBitset<int, float> x3;
+  LazyOrderedBitset<int, float>   x4;
+  printf("Using UnorderedBitset ...\n");
+  runExpt(x1); printf("Verified.\n\n");
+  printf("Using OrderedBitset ...\n");
+  runExpt(x2); printf("Verified.\n\n");
+  printf("Using LazyUnorderedBitset ...\n");
+  runExpt(x3); printf("Verified.\n\n");
+  printf("Using LazyOrderedBitset ...\n");
+  runExpt(x4); printf("Verified.\n\n");
   return 0;
 }
