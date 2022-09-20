@@ -2,6 +2,7 @@
 #include <utility>
 #include <stdexcept>
 #include <algorithm>
+#include <iterator>
 #include <vector>
 #include <unordered_map>
 #include "_algorithm.hxx"
@@ -14,6 +15,7 @@ using std::vector;
 using std::unordered_map;
 using std::out_of_range;
 using std::make_pair;
+using std::back_inserter;
 using std::move;
 using std::find_if;
 using std::lower_bound;
@@ -28,75 +30,81 @@ using std::sort;
 // Helps create bitsets.
 
 #ifndef BITSET_TYPES
-#define BITSET_TYPES(K, V, data) \
-  using key_type   = K; \
-  using value_type = V; \
-  using pair_type  = pair<K, V>; \
+#define BITSET_TYPES(K, V, buf, data) \
+  using key_type    = K; \
+  using value_type  = V; \
+  using pair_type   = pair<K, V>; \
+  using buffer_type = buf; \
   using iterator       = decltype(data.begin()); \
   using const_iterator = decltype(data.cbegin());
 #endif
 
 
 #ifndef BITSET_ITERATOR
+#define BITSET_ITERATOR_RANGE(K, V, db, de) \
+  ITERABLE_ITERATOR(inline, noexcept, db, de)
+#define BITSET_CITERATOR_RANGE(K, V, db, de) \
+  ITERABLE_CITERATOR(inline, noexcept, db, de)
+
 #define BITSET_ITERATOR(K, V, data) \
-  ITERABLE_ITERATOR(inline, noexcept, data.begin(), data.end())
+  BITSET_ITERATOR_RANGE(K, V, data.begin(), data.end())
 #define BITSET_CITERATOR(K, V, data) \
-  ITERABLE_CITERATOR(inline, noexcept, data.begin(), data.end())
+  BITSET_CITERATOR_RANGE(K, V, data.begin(), data.end())
 #endif
 
 
 #ifndef BITSET_SIZE
-#define BITSET_SIZE(K, V, data)  \
-  inline size_t size() const noexcept { return data.size(); }
+#define BITSET_SIZE(K, V)  \
+  inline size_t size() const noexcept { return distance(begin(), end()); }
 #define BITSET_EMPTY(K, V) \
   inline bool empty()  const noexcept { return size() == 0; }
 #endif
 
 
 #ifndef BITSET_FCOMPARE
-#define BITSET_FCOMPARE(K, V, fn, op) \
-  auto fn = [](const pair<K, V>& p, const pair<K, V>& q) { return p.first op q.first; };
-#define BITSET_FCOMPARES(K, V) \
-  BITSET_FCOMPARE(K, V, fl, <) \
-  BITSET_FCOMPARE(K, V, fe, ==)
+#define BITSET_FCOMPARE(fn, op) \
+  auto fn = [](const auto& p, const auto& q) { return p.first op q.first; };
+#define BITSET_FCOMPARES(fl, fe) \
+  BITSET_FCOMPARE(fl, <) \
+  BITSET_FCOMPARE(fe, ==)
 #endif
 
 
 #ifndef BITSET_FIND
-#define BITSET_FIND(K, V, data) \
+#define BITSET_FIND(K, V) \
   inline auto find(const K& k)        noexcept { return locate_match(k); } \
   inline auto cfind(const K& k) const noexcept { return locate_match(k); } \
   inline auto find(const K& k)  const noexcept { return cfind(k); }
 
-#define BITSET_FINDAT_USING(K, V, data, ffind, f0, f1) \
+#define BITSET_FINDAT_USING(K, V, ffind, f0, f1) \
   inline size_t findAt(const K& k) noexcept { \
     auto   it =  ffind(k); \
     return it == end()? size_t(-1) : it - begin(); \
   }
-#define BITSET_FINDAT(K, V, data) \
-  BITSET_FINDAT_USING(K, V, data, find, inline, noexcept) \
-  BITSET_FINDAT_USING(K, V, data, cfind, inline, const noexcept) \
-  BITSET_FINDAT_USING(K, V, data, cfind, inline, const noexcept)
+#define BITSET_FINDAT(K, V) \
+  BITSET_FINDAT_USING(K, V, find,  inline, noexcept) \
+  BITSET_FINDAT_USING(K, V, cfind, inline, const noexcept) \
+  BITSET_FINDAT_USING(K, V, cfind, inline, const noexcept)
 #endif
 
 
 #ifndef BITSET_ENTRIES
-#define BITSET_ENTRIES(K, V, data) \
+#define BITSET_ENTRIES(K, V) \
   /* dont change the keys! */ \
   inline auto values() noexcept { \
-    return staticTransformIterable(data, PairSecond<K, V>()); \
+    return static_transform_iterable(begin(), end(), PairSecond<K, V>()); \
   } \
   inline auto pairs() noexcept { \
-    return iterable(data); \
+    return iterable(begin(), end()); \
   } \
   inline auto ckeys() const noexcept { \
-    return staticTransformIterable(data, ConstPairFirst<K, V>()); \
+    return static_transform_iterable(begin(), end(), ConstPairFirst<K, V>()); \
   } \
   inline auto cvalues() const noexcept { \
-    return staticTransformIterable(data, ConstPairSecond<K, V>()); \
+    return static_transform_iterable(begin(), end(), ConstPairSecond<K, V>()); \
   } \
   inline auto cpairs() const noexcept { \
-    return iterable(data); \
+    return iterable(begin(), end()); \
   } \
   inline auto keys()   const noexcept { return ckeys(); } \
   inline auto values() const noexcept { return cvalues(); } \
@@ -105,36 +113,40 @@ using std::sort;
 
 
 #ifndef BITSET_FOREACH
-#define BITSET_FOREACH(K, V, data) \
+#define BITSET_FOREACH_KEY_USING(K, V, db, de, pname, f0, f1) \
+  template <class F> \
+  f0 void pname##forEachKey(F fn) f1 { \
+    for (auto it=db; it!=de; ++it) \
+      fn((*it).first); \
+  }
+#define BITSET_FOREACH_VALUE_USING(K, V, db, de, pname, f0, f1) \
+  template <class F> \
+  f0 void pname##forEachValue(F fn) f1 { \
+    for (auto it=db; it!=de; ++it) \
+      fn((*it).second); \
+  }
+#define BITSET_FOREACH_PAIR_USING(K, V, db, de, pname, f0, f1) \
+  template <class F> \
+  f0 void pname##forEachPair(F fn) f1 { \
+    for (auto it=db; it!=de; ++it) \
+      fn(*it); \
+  }
+#define BITSET_FOREACH_USING(K, V, db, de, pname, f0, f1) \
+  template <class F> \
+  f0 void pname##forEach(F fn) f1 { \
+    for (auto it=db; it!=de; ++it) \
+      fn((*it).first, (*it).second); \
+  }
+
+#define BITSET_FOREACH(K, V) \
   /* dont change the keys! */ \
-  template <class F> \
-  inline void forEachValue(F fn) { \
-    for (pair<K, V>& p : data) fn(p.second); \
-  } \
-  template <class F> \
-  inline void forEachPair(F fn) { \
-    for (pair<K, V>& p : data) fn(p); \
-  } \
-  template <class F> \
-  inline void forEach(F fn) { \
-    for (pair<K, V>& p : data) fn(p.first, p.second); \
-  } \
-  template <class F> \
-  inline void cforEachKey(F fn) const { \
-    for (const pair<K, V>& p : data) fn(p.first); \
-  } \
-  template <class F> \
-  inline void cforEachValue(F fn) const { \
-    for (const pair<K, V>& p : data) fn(p.second); \
-  } \
-  template <class F> \
-  inline void cforEachPair(F fn) const { \
-    for (const pair<K, V>& p : data) fn(p); \
-  } \
-  template <class F> \
-  inline void cforEach(F fn) const { \
-    for (const pair<K, V>& p : data) fn(p.first, p.second); \
-  } \
+  BITSET_FOREACH_VALUE_USING(K, V, begin(), end(),, inline,) \
+  BITSET_FOREACH_PAIR_USING (K, V, begin(), end(),, inline,) \
+  BITSET_FOREACH_USING      (K, V, begin(), end(),, inline,) \
+  BITSET_FOREACH_KEY_USING  (K, V, begin(), end(), c, inline, const) \
+  BITSET_FOREACH_VALUE_USING(K, V, begin(), end(), c, inline, const) \
+  BITSET_FOREACH_PAIR_USING (K, V, begin(), end(), c, inline, const) \
+  BITSET_FOREACH_USING      (K, V, begin(), end(), c, inline, const) \
   template <class F> \
   inline void forEachKey(F fn)   const { cforEachKey(fn); } \
   template <class F> \
@@ -192,10 +204,7 @@ using std::sort;
 
 #ifndef BITSET_CORRECT
 #define BITSET_CORRECT(K, V) \
-  inline bool correct(bool unq, vector<pair<K, V>>& buf) { \
-    return false; \
-  } \
-  inline bool correct(bool unq=false) { \
+  inline bool correct(vector<typename buffer_type>& buf) { \
     return false; \
   }
 #endif
@@ -213,13 +222,13 @@ using std::sort;
 #define BITSET_FILTER_IF_USING(K, V, data, name, fname) \
   template <class F> \
   inline void filterIf##name(F fn) { \
-    data.resize(pairsFilterIf##fname(data, fn)); \
+    data.resize(pairs_filter_if##fname(begin(), end(), fn)); \
   }
 
 #define BITSET_FILTER_IF(K, V, data) \
   BITSET_FILTER_IF_USING(K, V, data,,) \
-  BITSET_FILTER_IF_USING(K, V, data, Key, Key) \
-  BITSET_FILTER_IF_USING(K, V, data, Value, Value)
+  BITSET_FILTER_IF_USING(K, V, data, Key, _key) \
+  BITSET_FILTER_IF_USING(K, V, data, Value, _value)
 #endif
 
 
@@ -228,13 +237,34 @@ using std::sort;
 // UNORDERED-BITSET
 // ----------------
 // An integer set that constantly checks duplicates.
-// It maintains integers in insertion order.
+// It maintains keys in insertion order.
 
 #define UNORDERED_BITSET_LOCATE(K, V, f0, f1) \
   f0 auto locate_match(const K& k) f1 { \
     auto fe = [&](const pair<K, V>& p) { return p.first == k; }; \
     return find_if(begin(), end(), fe); \
   }
+
+
+template <bool ORD, class ID, class IK>
+auto unordered_bitset_remove_batch(ID db, ID de, IK kb, IK ke, size_t kn) {
+  auto fu = [&](const auto& d) { return find_value(kb, ke, d.first) != ke; };
+  auto fo = [&](const auto& d) { return lower_find(kb, ke, d.first) != ke; };
+  if (!ORD || kn < linearSearchSize(*kb)) return unordered_reject_limited_if(db, de, kn, fu);
+  return unordered_reject_limited_if(db, de, kn, fo);
+}
+
+template <bool ORD, class ID, class IP, class IA>
+auto unordered_bitset_add_batch(ID db, ID de, IP pb, IP pe, size_t pn, IA ab, vector<bool>& buf) {
+  BITSET_FCOMPARES(fl, fe)
+  if (buf.size() < pn) buf.resize(pn);
+  fill(buf.begin(), buf.begin() + pn, false);
+  if (pn < linearSearchSize(*pb)) includes_each_value(db, de, pb, pe, buf, fe);
+  else includes_each_value_ordered(db, de, pb, pe, buf, fl, fe);
+  for (size_t i=0; i<pn; ++i, ++pb)
+    if (!buf[i]) *(ab++) = *pb;
+  return ab;
+}
 
 
 template <class K=int, class V=NONE>
@@ -245,7 +275,7 @@ class UnorderedBitset {
 
   // Types.
   public:
-  BITSET_TYPES(K, V, data)
+  BITSET_TYPES(K, V, bool, data)
 
 
   // Iterator operations.
@@ -256,7 +286,7 @@ class UnorderedBitset {
 
   // Size operations.
   public:
-  BITSET_SIZE(K, V, data)
+  BITSET_SIZE(K, V)
   BITSET_EMPTY(K, V)
 
 
@@ -265,14 +295,14 @@ class UnorderedBitset {
   UNORDERED_BITSET_LOCATE(K, V, inline, noexcept)
   UNORDERED_BITSET_LOCATE(K, V, inline, const noexcept)
   public:
-  BITSET_FIND(K, V, data)
-  BITSET_FINDAT(K, V, data)
+  BITSET_FIND(K, V)
+  BITSET_FINDAT(K, V)
 
 
   // Access operations.
   public:
-  BITSET_ENTRIES(K, V, data)
-  BITSET_FOREACH(K, V, data)
+  BITSET_ENTRIES(K, V)
+  BITSET_FOREACH(K, V)
   BITSET_HAS(K, V)
   BITSET_GET(K, V)
   BITSET_SET(K, V)
@@ -289,12 +319,6 @@ class UnorderedBitset {
     return true;
   }
 
-  inline bool removeAt(size_t i) {
-    auto it = begin() + i;
-    *it = move(*(end()-1));
-    data.pop_back();
-    return true;
-  }
   inline bool remove(const K& k) {
     auto it = locate_match(k);
     if (it == end()) return false;
@@ -302,52 +326,161 @@ class UnorderedBitset {
     data.pop_back();
     return true;
   }
-
-  inline bool addUnchecked(const K& k, const V& v=V()) {
-    data.push_back({k, v});
+  inline bool removeAt(size_t i) {
+    auto it = begin() + i;
+    *it = move(*(end()-1));
+    data.pop_back();
     return true;
   }
+
   inline bool add(const K& k, const V& v=V()) {
     auto it = locate_match(k);
     if (it == end()) data.push_back({k, v});
     else (*it).second = v;
     return true;
   }
+  inline bool addUnchecked(const K& k, const V& v=V()) {
+    data.push_back({k, v});
+    return true;
+  }
 
-  template <class KS, bool ORD=false>
+  template <bool ORD, class KS>
   inline bool removeBatch(const KS& keys) {
-    size_t oldSize = size();
-    auto kb = keys.begin(), ke = keys.end(), kn = keys.size();
-    auto fremoves = [&](const auto& k) { remove(k); };
-    auto frejectu = [&](const auto& x) { return find_value(kb, ke, x.first) != ke; };
-    auto frejecto = [&](const auto& x) { return lower_find(kb, ke, x.first) != ke; };
-    if (kn < 4) for_each(kb, ke, fremoves);
-    else if (!ORD || kn < linearSearchSize(*kb)) unorderedRejectLimitedIf(data, kn, frejectu);
-    else unorderedRejectLimitedIf(data, kn, frejecto);
-    return size() != oldSize;
+    auto db = begin(), de = end();
+    auto kb = keys.begin(), ke = keys.end(); size_t kn = keys.size();
+    if (kn==0) return false;
+    if (kn==1) return remove(*kb);
+    auto it = unordered_bitset_remove_batch<ORD>(db, de, kb, ke, kn);
+    data.erase(it, de);
+    return it != de;
   }
 
   template <class PS, bool ORD=false>
   inline bool addBatch(const PS& pairs, vector<bool>& buf) {
-    size_t oldSize = size();
-    auto pb = pairs.begin(), pe = pairs.end(), pn = pairs.size();
-    auto fadds  = [&](const auto& p) { add(p.first, p.second); };
-    auto fmarkl = [](const auto& a, const auto& b) { return a.first <  b.first; };
-    auto fmarke = [](const auto& a, const auto& b) { return a.first == b.first; };
-    if (!ORD || pn < 4) { for_each(pb, pe, fadds); return size() != oldSize; }
-    if (buf.size() < pn) buf.resize(pn);
-    fill(buf.begin(), buf.begin() + pn, false);
-    if (pn < linearSearchSize(*pb)) includesEachValue(data, pairs, buf, fmarke);
-    else includesEachValueOrdered(data, pairs, buf, fmarkl, fmarke);
-    for (size_t i=0; i<pn; ++i)
-      if (!buf[i]) data.push_back(pairs[i]);
-    return size() != oldSize;
+    auto db = begin(), de = end();
+    auto pb = pairs.begin(), pe = pairs.end(); size_t pn = pairs.size();
+    if (pn==0) return false;
+    if (pn==1) return add((*pb).first, (*pb).second);
+    auto it = unordered_bitset_add_batch(db, de, pb, pe, pn, back_inserter(data), buf);
+    return it != de;
   }
 };
 
 template <class K=int, class V=NONE>
 inline auto unorderedBitset(K _k=K(), V _v=V()) {
   return UnorderedBitset<K, V>();
+}
+
+
+
+
+// LAZY-UNORDERED-BITSET
+// ---------------------
+// An integer set that checks duplicates only on correct().
+// It maintains keys in insertion order.
+
+template <class K=int, class V=NONE>
+class LazyUnorderedBitset {
+  // Data.
+  protected:
+  vector<pair<K, V>> data;
+  vector<K> removed;
+  size_t included;
+  // included elements = data[0..included]
+  // added elements    = data[included..]
+
+  // Types.
+  public:
+  BITSET_TYPES(K, V, bool, data)
+
+
+  // Iterator operations.
+  public:
+  BITSET_ITERATOR_RANGE (K, V, data.begin(), data.begin()+included)
+  BITSET_CITERATOR_RANGE(K, V, data.begin(), data.begin()+included)
+
+
+  // Size operations.
+  public:
+  BITSET_SIZE(K, V)
+  BITSET_EMPTY(K, V)
+
+
+  // Search operations.
+  protected:
+  UNORDERED_BITSET_LOCATE(K, V, inline, noexcept)
+  UNORDERED_BITSET_LOCATE(K, V, inline, const noexcept)
+  public:
+  BITSET_FIND(K, V)
+  BITSET_FINDAT(K, V)
+
+
+  // Access operations.
+  public:
+  BITSET_ENTRIES(K, V)
+  BITSET_FOREACH(K, V)
+  BITSET_HAS(K, V)
+  BITSET_GET(K, V)
+  BITSET_SET(K, V)
+  BITSET_SUBSCRIPT(K, V)
+  BITSET_AT(K, V)
+
+
+  // Update operations.
+  public:
+  inline bool correct(vector<bool>& buf) {
+    auto db = begin(), de = end(), pb = de, pe = data.end(); size_t pn = data.size() - size();
+    auto kb = removed.begin(), ke = removed.end(); size_t kn = removed.size();
+    auto pb = removed.begin(), pe = removed.end(); size_t pn = removed.size();
+    auto ir = unordered_bitset_remove_batch<ORD>(db, de, kb, ke, kn);
+    bool wasRemoved = ir != de;
+    auto ia = unordered_bitset_add_batch(db, ir, pb, pe, pn, ir, buf);
+    bool wasAdded   = ia != ir;
+    data.erase(ia, data.end());
+    removed.clear();
+    included = data.size();
+    return wasRemoved || wasAdded;
+  }
+
+  BITSET_FILTER_IF(K, V, data)
+  inline bool clear() noexcept {
+    data.clear();
+    removed.clear();
+    included = 0;
+    return true;
+  }
+
+  inline bool remove(const K& k) {
+    removed.push_back(k);
+    return true;
+  }
+  inline bool removeAt(size_t i) {
+    removed.push_back(data[i].first);
+    return true;
+  }
+
+  inline bool add(const K& k, const V& v=V()) {
+    data.push_back({k, v});
+    return true;
+  }
+  BITSET_ADD_UNCHECKED(K, V)
+
+  template <class KS, bool ORD=false>
+  inline bool removeBatch(const KS& keys) {
+    removed.insert(removed.end(), keys.begin(), keys.end());
+    return keys.size() != 0;
+  }
+
+  template <class PS, bool ORD=false>
+  inline bool addBatch(const PS& pairs, vector<bool>& buf) {
+    data.insert(data.end(), pairs.begin(), pairs.end());
+    return pairs.size() != 0;
+  }
+};
+
+template <class K=int, class V=NONE>
+inline auto lazyUnorderedBitset(K _k=K(), V _v=V()) {
+  return LazyUnorderedBitset<K, V>();
 }
 
 
@@ -377,7 +510,7 @@ class OrderedBitset {
 
   // Types.
   public:
-  BITSET_TYPES(K, V, data)
+  BITSET_TYPES(K, V, pair<K, V>, data)
 
 
   // Iterator operations.
