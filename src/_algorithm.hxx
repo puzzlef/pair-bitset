@@ -948,44 +948,99 @@ inline auto setDifferenceVector(const JX& x, const JY& y, FE fe) {
 // UNIQUE-*
 // --------
 
+template <class I, class FE>
+inline auto unique_values(I ib, I ie, FE fe) {
+  return unique(ib, ie, fe);
+}
 template <class I>
 inline auto unique_values(I ib, I ie) {
   return unique(ib, ie);
 }
-template <class I, class FE>
-inline auto unique_values(I ib, I ie, FE fe) {
-  return unique(ib, ie, fe);
+
+template <class J, class FE>
+inline size_t uniqueValues(J& x, FE fe) {
+  auto   it = unique_values(x.begin(), x.end(), fe);
+  return it - x.begin();
 }
 template <class J>
 inline size_t uniqueValues(J& x) {
   auto   it = unique_values(x.begin(), x.end());
   return it - x.begin();
 }
+
+
+template <class I, class FE>
+auto unique_last(I ib, I ie, FE fe) {
+  if (ib==ie) return ie;
+  for (auto it=ib++; ib!=ie; ++ib)
+    if (fe(*it, *ib) || ++it!=ib) *it = move(*ib);
+  return ++it;
+}
+template <class I>
+inline auto unique_last(I ib, I ie) {
+  auto fe = [](const auto& a, const auto& b) { return a==b; };
+  return unique_last(ib, ie, fe);
+}
+
 template <class J, class FE>
-inline size_t uniqueValues(J& x, FE fe) {
-  auto   it = unique_values(x.begin(), x.end(), fe);
+inline size_t uniqueLast(J& x, FE fe) {
+  auto   it = unique_last(x.begin(), x.end(), fe);
+  return it - x.begin();
+}
+template <class J>
+inline size_t uniqueLast(J& x) {
+  auto   it = unique_last(x.begin(), x.end());
   return it - x.begin();
 }
 
 
+
+
+// SORTED-UNIQUE
+// -------------
+
+template <class I, class FL, class FE>
+inline auto sorted_unique(I ib, I ie, FL fl, FE fe) {
+  sort(ib, ie, fl);
+  return unique(ib, ie, fe);
+}
 template <class I>
 inline auto sorted_unique(I ib, I ie) {
   sort(ib, ie);
   return unique(ib, ie);
 }
-template <class I, class FL, class FE>
-inline auto sorted_unique(I ib, I ie, FL fl, FE fe) {
-  sort(ib, ie, fl);
-  return unique(ib, ie, fe);
+
+template <class J, class FL, class FE>
+inline size_t sortedUnique(J& x, FL fl, FE fe) {
+  auto   it = sorted_unique(x.begin(), x.end(), fl, fe);
+  return it - x.begin();
 }
 template <class J>
 inline size_t sortedUnique(J& x) {
   auto   it = sorted_unique(x.begin(), x.end());
   return it - x.begin();
 }
+
+
+template <class I, class FL, class FE>
+inline auto sorted_unique_last(I ib, I ie, FL fl, FE fe) {
+  sort(ib, ie, fl);
+  return unique_last(ib, ie, fe);
+}
+template <class I>
+inline auto sorted_unique_last(I ib, I ie) {
+  sort(ib, ie);
+  return unique_last(ib, ie);
+}
+
 template <class J, class FL, class FE>
-inline size_t sortedUnique(J& x, FL fl, FE fe) {
-  auto   it = sorted_unique(x.begin(), x.end(), fl, fe);
+inline size_t sortedUniqueLast(J& x, FL fl, FE fe) {
+  auto   it = sorted_unique_last(x.begin(), x.end(), fl, fe);
+  return it - x.begin();
+}
+template <class J>
+inline size_t sortedUniqueLast(J& x) {
+  auto   it = sorted_unique_last(x.begin(), x.end());
   return it - x.begin();
 }
 

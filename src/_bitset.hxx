@@ -40,9 +40,9 @@ using std::sort;
 #endif
 
 
-#ifndef BITSET_IS_LAZY
-#define BITSET_IS_LAZY(ans) \
-  inline constexpr bool isLazy() const { return ans; }
+#ifndef BITSET_PROPERTIES
+#define BITSET_PROPERTIES(K, V, lazy) \
+  static constexpr bool is_lazy = lazy;
 #endif
 
 
@@ -176,6 +176,7 @@ using std::sort;
     return it == end()? V() : (*it).second; \
   }
 
+// Doesn't add if it does not already exist.
 #define BITSET_SET(K, V) \
   inline bool set(const K& k, const V& v) noexcept { \
     auto it = locate_match(k); \
