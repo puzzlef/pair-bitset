@@ -155,7 +155,11 @@ sorted approach.
 
 ## References
 
-- [Stanford Large Network Dataset Collection]
+- [Fast Compact Sparse Bit Sets by Justin Collins](https://blog.presidentbeef.com/blog/2013/09/02/fast-compact-sparse-bitsets/)
+- [SparseBitSet: An efficient sparse bit set implementation for Java; by Brett Wooldridge](https://github.com/brettwooldridge/SparseBitSet)
+- [boost::dynamic_bitset<Block, Allocator>](https://www.boost.org/doc/libs/1_36_0/libs/dynamic_bitset/dynamic_bitset.html)
+- [Stanford Large Network Dataset Collection](http://snap.stanford.edu/data/index.html)
+- [Good library for bitsets or bitarrays](https://stackoverflow.com/questions/4052795/good-library-for-bitsets-or-bitarrays)
 
 <br>
 <br>
